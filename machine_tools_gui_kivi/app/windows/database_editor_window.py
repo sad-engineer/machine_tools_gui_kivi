@@ -19,10 +19,13 @@ from kivymd.app import MDApp
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
+from kivy.uix.spinner import Spinner
+from kivy.clock import Clock
 
 from machine_tools_gui_kivi.app.components.template_window import \
     TemplateWindow
-from machine_tools import MachineInfo
+from machine_tools_gui_kivi.src.machine_finder import MACHINE_TOOL_NAMES, filter_names
+from machine_tools_gui_kivi.app.components.search_template import SearchTemplate
 
 
 class TemplateDatabaseEditorWindow(TemplateWindow):
@@ -36,43 +39,55 @@ class TemplateDatabaseEditorWindow(TemplateWindow):
         self._init_content()
 
     def _init_content(self):
-        """Инициализирует содержимое окна."""
+        """Инициализирует контент окна."""
+        self.content = self._create_template_content()
+        self.root_box.add_widget(self.content)
+
+    def _create_template_content(self):
+        """Создает основной контент окна с двумя колонками."""
         # Создаем горизонтальный контейнер для колонок
-        columns = BoxLayout(
-            orientation='horizontal',
+        content = BoxLayout(
+            orientation="horizontal",
+            padding=[5, 5, 5, 5],
             spacing=10,
-            size_hint_y=1,
-        )
-        left_col = self._create_left_column()
-        right_col = self._create_right_column()
-        columns.add_widget(left_col)
-        columns.add_widget(right_col)
-        self.content.add_widget(columns)
-
-    def _create_left_column(self):
-        """Создает левую колонку с настройками."""
-        # Левая колонка
-        left_col = BoxLayout(
-            orientation='vertical',
-            width=350,
-            size_hint_x=None,
         )
 
-        # Создаем поле поиска
-        search_field = self._create_search_field()
+        # Создаем колонки
+        left_col = self._fill_left_column()
+        right_col = self._fill_right_column()
 
-        # Добавляем поле поиска в левую колонку
-        left_col.add_widget(search_field)
+        # Добавляем колонки в основной контейнер
+        content.add_widget(left_col)
+        content.add_widget(right_col)
 
+        # Привязываем отладочные обновления
+        content.bind(
+            pos=self._update_template_content_debug,
+            size=self._update_template_content_debug,
+        )
+        left_col.bind(
+            pos=self._update_template_content_debug,
+            size=self._update_template_content_debug,
+        )
+        right_col.bind(
+            pos=self._update_template_content_debug,
+            size=self._update_template_content_debug,
+        )
+
+        return content
+
+    def _fill_left_column(self):
+        """Наполняет левую колонку виджетами."""
+        left_col = BoxLayout(orientation="vertical")
+        # Добавляем шаблон поиска
+        search_template = SearchTemplate()
+        left_col.add_widget(search_template)
         left_col.bind(pos=self._update_left_col_debug, size=self._update_left_col_debug)
         return left_col
 
-    def _create_right_column(self):
-        """Создает  правую колонку виджетами."""
-        # Правая колонка
-        right_col = BoxLayout(height=400, width=275, orientation='vertical')
-
-
+    def _fill_right_column(self):
+        """Наполняет правую колонку виджетами."""
+        right_col = BoxLayout(orientation="vertical")
         right_col.bind(pos=self._update_right_col_debug, size=self._update_right_col_debug)
         return right_col
 
@@ -88,6 +103,13 @@ class TemplateDatabaseEditorWindow(TemplateWindow):
             instance.canvas.before.clear()
             with instance.canvas.before:
                 Color(0, 0, 1, 0.3)  # Синий с прозрачностью
+                Rectangle(pos=instance.pos, size=instance.size)
+
+    def _update_template_content_debug(self, instance, value):
+        if self.debug_mode:
+            instance.canvas.before.clear()
+            with instance.canvas.before:
+                Color(0, 0, 0, 0.3)  # Черный с прозрачностью
                 Rectangle(pos=instance.pos, size=instance.size)
 
     def _init_buttons(self):
@@ -113,7 +135,8 @@ class TemplateDatabaseEditorWindow(TemplateWindow):
             size_hint=(1, None),
             height=50,
             padding=[0, 0, 0, 10],
-            spacing=5
+            spacing=5,
+            pos_hint={'top': 1}  # Привязка к верхнему краю
         )
 
         # Создаем поле ввода
@@ -121,7 +144,17 @@ class TemplateDatabaseEditorWindow(TemplateWindow):
             hint_text="Введите название станка для поиска",
             multiline=False,
             halign='center',
-            size_hint=(0.8, 1)
+            size_hint=(0.8, 1),
+            on_text=self._on_search_text_changed
+        )
+
+        # Создаем выпадающий список
+        self.search_spinner = Spinner(
+            text='Выберите станок',
+            values=[],
+            size_hint=(0.8, 1),
+            pos_hint={'top': 1},
+            opacity=0  # Используем opacity вместо visible
         )
 
         # Создаем кнопку поиска
@@ -135,7 +168,45 @@ class TemplateDatabaseEditorWindow(TemplateWindow):
         search_box.add_widget(self.search_input)
         search_box.add_widget(self.search_button)
 
-        return search_box
+        # Создаем контейнер для выпадающего списка
+        self.spinner_container = BoxLayout(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=0,
+            pos_hint={'top': 1}
+        )
+        self.spinner_container.add_widget(self.search_spinner)
+
+        # Добавляем контейнеры в левую колонку
+        left_col = BoxLayout(orientation="vertical")
+        left_col.add_widget(search_box)
+        left_col.add_widget(self.spinner_container)
+        left_col.add_widget(Widget(size_hint_y=1))
+
+        return left_col
+
+    def _on_search_text_changed(self, instance, value):
+        """Обработчик изменения текста в поле поиска."""
+        if value:
+            self._update_spinner_trigger()
+        else:
+            self.search_spinner.values = []
+            self.search_spinner.opacity = 0
+            self.spinner_container.height = 0
+
+    def _update_spinner_values(self, dt):
+        """Обновляет значения в выпадающем списке."""
+        search_text = self.search_input.text
+        if search_text:
+            filtered_names = filter_names(search_text)
+            if filtered_names:
+                self.search_spinner.values = filtered_names
+                self.search_spinner.opacity = 1
+                self.spinner_container.height = 200  # Высота выпадающего списка
+            else:
+                self.search_spinner.values = []
+                self.search_spinner.opacity = 0
+                self.spinner_container.height = 0
 
     def _on_search(self, instance):
         """Обработчик нажатия кнопки поиска."""
