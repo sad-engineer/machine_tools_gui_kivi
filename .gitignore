@@ -1,0 +1,20 @@
+__pycache__
+Venv
+Venv / 
+Venv.bak /
+venv
+env / 
+env.bak / 
+.pytest_cache 
+.cover / 
+.coverage 
+.idea
+.idea/
+temp/
+dist/
+settings.yaml
+launch_config.json
+input
+input/
+output
+output/
