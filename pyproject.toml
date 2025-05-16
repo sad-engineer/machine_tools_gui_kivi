@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "machine-tools-gui-kivi"
-version = "0.0.01"
+version = "0.0.02"
 description = "Пакет для работы с базой данных станков с графической оболочкой"
 authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
 readme = "README.md"
