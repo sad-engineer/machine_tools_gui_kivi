@@ -1,0 +1,16 @@
+cd C:\Users\Korenyk.A\Downloads\pgsql\bin
+cd "C:\Program Files\PostgreSQL\17"
+.\pg_ctl.exe start -D "C:\Users\Korenyk.A\Downloads\pgsql\data"
+.\pg_ctl.exe start -D "C:\Program Files\PostgreSQL\17\data"
+netstat -ano | findstr 5432
+.\psql.exe -U machine_tools
+.\psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'machine_tools';"
+.\dropdb.exe -U postgres machine_tools
+
+CREATE DATABASE machine_tools
+     WITH
+     OWNER = postgres
+     ENCODING = 'UTF8'
+     LC_COLLATE = 'Russian_Russia.1251'
+     LC_CTYPE = 'Russian_Russia.1251'
+     TEMPLATE = template0;
