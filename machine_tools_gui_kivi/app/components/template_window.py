@@ -93,7 +93,6 @@ class TemplateWindow(FloatLayout):
         """Создает основной контент окна."""
         self.content = BoxLayout(
             orientation="vertical",
-            padding=[5, 5, 5, 5],
             spacing=5,
         )
         self.content.bind(
