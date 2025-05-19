@@ -16,9 +16,10 @@ from kivy.uix.spinner import Spinner
 
 from machine_tools_gui_kivi.app.components.template_window import \
     TemplateWindow
-from machine_tools_gui_kivi.src.machine_finder import MachineInfo, filter_names, get_machine_info
+from machine_tools_gui_kivi.src.machine_finder import filter_names
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 from machine_tools_gui_kivi.app.components.database_editor_content import TemplateDatabaseEditorContent
+from machine_tools import info_by_name as get_info_by_name, MachineInfo
 
 
 class DatabaseEditorWindow(Screen):
@@ -53,7 +54,7 @@ class DatabaseEditorWindow(Screen):
         self.set_widget_data(model)
 
     def set_widget_data(self, model: str):
-        data = get_machine_info(model, exact_match=True)
+        data = get_info_by_name(model)
         """Устанавливает данные в виджеты."""
         if isinstance(data, MachineInfo):
             print(f"Данные станка: {data}")

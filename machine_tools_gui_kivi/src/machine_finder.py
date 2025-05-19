@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from machine_tools import MachineInfo, MachineFinder
+from machine_tools import get_finder_with_list_names as finder
 import timeit
 
-machine_finder = MachineFinder()
-MACHINE_TOOL_NAMES = machine_finder.all()
-
-machine_info_finder = MachineFinder()
-get_machine_info = machine_info_finder.by_name
+MACHINE_TOOL_NAMES = finder().all()
 
 
 def filter_names(name: str) -> list[str]:
