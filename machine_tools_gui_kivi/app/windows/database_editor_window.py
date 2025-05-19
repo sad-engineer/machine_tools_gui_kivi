@@ -57,6 +57,19 @@ class DatabaseEditorWindow(Screen):
         data = get_info_by_name(model)
         """Устанавливает данные в виджеты."""
         if isinstance(data, MachineInfo):
+            self.content_widget.group_input.text = str(data.group)
+            self.content_widget.type_input.text = str(data.type)
+            self.content_widget.machine_type_input.text = str(data.machine_type)
+            self.content_widget.power_input.text = str(data.power)
+            self.content_widget.efficiency_input.text = str(data.efficiency)
+            self.content_widget.accuracy_input.text = str(data.accuracy)
+            self.content_widget.automation_input.text = str(data.automation)
+            self.content_widget.specialization_input.text = str(data.specialization)
+            self.content_widget.mass_input.text = str(data.weight)
+            self.content_widget.mass_class_input.text = str(data.weight_class)
+            self.content_widget.production_city_input.text = str(data.location.city)
+            self.content_widget.organization_input.text = str(data.location.manufacturer)
+
             print(f"Данные станка: {data}")
 
     def on_search_input_changed(self, instance, value:str):
@@ -98,3 +111,213 @@ if __name__ == "__main__":
             return window
 
     TestApp().run()
+
+
+
+
+# # Добавляем шаблон поиска
+#         self.search_bar = SearchBar(
+#             input_hint="Введите название станка",
+#             button_text="Поиск",
+#             input_ratio=0.8,
+#             height=35,
+#             debug_mode=self.debug_mode,
+#         )
+#         self.search_bar.size_hint = (1, None)
+#         self.search_bar.pos_hint = {'top': 1}
+#
+#         #Лейбл с надписью "Группа станка"
+#         group_label = Label(
+#             text="Группа станка",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода группы станка
+#         self.group_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Тип станка"
+#         type_label = Label(
+#             text="Тип станка",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода типа станка
+#         self.type_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         self.machine_type_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Мощность"
+#         power_label = Label(
+#             text="Мощность",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода мощности
+#         self.power_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "КПД"
+#         efficiency_label = Label(
+#             text="КПД",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода КПД
+#         self.efficiency_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Точность"
+#         accuracy_label = Label(
+#             text="Точность",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода точности
+#         self.accuracy_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Автоматизация"
+#         automation_label = Label(
+#             text="Автоматизация",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода автоматизации
+#         self.automation_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Специализация    "
+#         specialization_label = Label(
+#             text="Специализация",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода специализации
+#         self.specialization_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Масса"
+#         mass_label = Label(
+#             text="Масса",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода массы
+#         self.mass_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Класс станка по массе    "
+#         mass_class_label = Label(
+#             text="Класс станка по массе",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода класса станка по массе
+#         self.mass_class_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Город производства"
+#         production_city_label = Label(
+#             text="Город производства",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода города производства
+#         self.production_city_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         #Лейбл с надписью "Организация-производитель"
+#         organization_label = Label(
+#             text="Организация-производитель",
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#         #Поле для ввода организации-производителя
+#         self.organization_input = TextInput(
+#             size_hint=(1, None),
+#             height=30,
+#             halign="left"
+#         )
+#
+#         # Добавляем все виджеты в left_col
+#         left_col.add_widget(self.search_bar)
+#         left_col.add_widget(group_label)
+#         left_col.add_widget(self.group_input)
+#         left_col.add_widget(type_label)
+#         left_col.add_widget(self.type_input)
+#         left_col.add_widget(self.machine_type_input)
+#         left_col.add_widget(power_label)
+#         left_col.add_widget(self.power_input)
+#         left_col.add_widget(efficiency_label)
+#         left_col.add_widget(self.efficiency_input)
+#         left_col.add_widget(accuracy_label)
+#         left_col.add_widget(self.accuracy_input)
+#         left_col.add_widget(automation_label)
+#         left_col.add_widget(self.automation_input)
+#         left_col.add_widget(specialization_label)
+#         left_col.add_widget(self.specialization_input)
+#         left_col.add_widget(mass_label)
+#         left_col.add_widget(self.mass_input)
+#         left_col.add_widget(mass_class_label)
+#         left_col.add_widget(self.mass_class_input)
+#         left_col.add_widget(production_city_label)
+#         left_col.add_widget(self.production_city_input)
+#         left_col.add_widget(organization_label)
+#         left_col.add_widget(self.organization_input)
+
+# Добавляем выпадающий список
+#         self.search_bar_dropdown = DropdownList(
+#             size_hint=(0.4, None),
+#             height=200,
+#             item_height=30,
+#             item_spacing=2,
+#             bar_width=10,
+#             item_cols=2,
+#             opacity=0
+#         )
