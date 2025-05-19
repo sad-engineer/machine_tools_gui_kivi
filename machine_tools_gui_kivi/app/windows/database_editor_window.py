@@ -5,20 +5,17 @@
 Модуль содержит класс окна ввода данных, наследующий от шаблонного окна.
 """
 from kivy.core.window import Window
-from kivy.graphics import Color, Rectangle
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
-from kivy.uix.textinput import TextInput
-from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 from kivy.uix.spinner import Spinner
+import copy
+from typing import Optional
 
 from machine_tools_gui_kivi.app.components.template_window import \
     TemplateWindow
 from machine_tools_gui_kivi.src.machine_finder import filter_names
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
-from machine_tools_gui_kivi.app.components.database_editor_content import TemplateDatabaseEditorContent
+from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
 from machine_tools import info_by_name as get_info_by_name, MachineInfo
 
 
@@ -28,60 +25,83 @@ class DatabaseEditorWindow(Screen):
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(**kwargs)
         self.name = "input_window"
+        self.model : Optional[str] = None
+        self.old_data : Optional[MachineInfo] = None  # Старые данные станка
+        self.new_data : Optional[MachineInfo] = None  # Новые данные станка
+
         # Создаем шаблонное окно
         self.template_window = TemplateWindow(
             screen_manager=screen_manager, debug_mode=debug_mode
         )
 
         # Добавляем контент
-        self.content_widget = TemplateDatabaseEditorContent(
+        self.content_widget = TemplateDatabaseEditor(
             screen_manager=screen_manager,
             debug_mode=debug_mode
         )
         self.template_window.content.add_widget(self.content_widget)
         self.add_widget(self.template_window)
-        self.add_widget(self.content_widget.search_bar_dropdown)
+        self.add_widget(self.content_widget.left_col.search_bar_dropdown)
 
-        self.content_widget.search_bar.button.bind(on_release=self.on_search_machine)
-        self.content_widget.search_bar.input.bind(text=self.on_search_input_changed)
-        self.content_widget.search_bar_dropdown.on_select = self.on_dropdown_select
+        self.content_widget.left_col.search_bar.button.bind(on_release=self.on_search_machine)
+        self.content_widget.left_col.search_bar.input.bind(text=self.on_search_input_changed)
+        self.content_widget.left_col.search_bar_dropdown.on_select = self.on_dropdown_select
 
     def on_search_machine(self, instance):
         """Обрабатывает событие нажатия на кнопку поиска."""
         # Получаем текст из поля ввода
-        model = self.content_widget.search_bar.input.text
-        print(f"Выбран станок модели: {model}")
-        self.set_widget_data(model)
+        self.model = self.content_widget.left_col.search_bar.input.text
+        print(f"Выбран станок модели: {self.model}")
+        self.old_data = get_info_by_name(self.model)
+        self.new_data = copy.deepcopy(self.old_data)
+        self.set_widget_data(self.old_data)
 
-    def set_widget_data(self, model: str):
-        data = get_info_by_name(model)
+    def set_widget_data(self, data: MachineInfo):
         """Устанавливает данные в виджеты."""
         if isinstance(data, MachineInfo):
-            self.content_widget.group_input.text = str(data.group)
-            self.content_widget.type_input.text = str(data.type)
-            self.content_widget.machine_type_input.text = str(data.machine_type)
-            self.content_widget.power_input.text = str(data.power)
-            self.content_widget.efficiency_input.text = str(data.efficiency)
-            self.content_widget.accuracy_input.text = str(data.accuracy)
-            self.content_widget.automation_input.text = str(data.automation)
-            self.content_widget.specialization_input.text = str(data.specialization)
-            self.content_widget.mass_input.text = str(data.weight)
-            self.content_widget.mass_class_input.text = str(data.weight_class)
-            self.content_widget.production_city_input.text = str(data.location.city)
-            self.content_widget.organization_input.text = str(data.location.manufacturer)
-
+            self.content_widget.left_col.group_input.text = str(data.group)
+            self.content_widget.left_col.type_input.text = str(data.type)
+            self.content_widget.left_col.machine_type_input.text = str(data.machine_type)
+            self.content_widget.left_col.power_input.text = str(data.power)
+            self.content_widget.left_col.efficiency_input.text = str(data.efficiency)
+            self.content_widget.left_col.accuracy_input.text = str(data.accuracy)
+            self.content_widget.left_col.automation_input.text = str(data.automation)
+            self.content_widget.left_col.specialization_input.text = str(data.specialization)
+            self.content_widget.left_col.mass_input.text = str(data.weight)
+            self.content_widget.left_col.mass_class_input.text = str(data.weight_class)
+            self.content_widget.left_col.production_city_input.text = str(data.location.city)
+            self.content_widget.left_col.organization_input.text = str(data.location.manufacturer)
             print(f"Данные станка: {data}")
+    
+    def clear_widgets(self):
+        """Очищает все виджеты."""
+        self.content_widget.left_col.group_input.text = ""
+        self.content_widget.left_col.type_input.text = ""
+        self.content_widget.left_col.machine_type_input.text = ""
+        self.content_widget.left_col.power_input.text = ""
+        self.content_widget.left_col.efficiency_input.text = ""
+        self.content_widget.left_col.accuracy_input.text = ""
+        self.content_widget.left_col.automation_input.text = ""
+        self.content_widget.left_col.specialization_input.text = ""
+        self.content_widget.left_col.mass_input.text = ""
+        self.content_widget.left_col.mass_class_input.text = ""
+        self.content_widget.left_col.production_city_input.text = ""
+        self.content_widget.left_col.organization_input.text = ""       
+        
 
     def on_search_input_changed(self, instance, value:str):
         """Обрабатывает событие изменения текста в поле ввода."""
+        print(value)
+        if value != self.model:
+            self.clear_widgets()
         value = value.upper()
-        searchbar = self.content_widget.search_bar
-        dropdown = self.content_widget.search_bar_dropdown
+        searchbar = self.content_widget.left_col.search_bar
+        dropdown = self.content_widget.left_col.search_bar_dropdown
         if len(value) > 0:
             filtered = filter_names(value)
             dropdown.update_items(filtered)
             # Показываем список только если есть варианты и поле в фокусе
-            if filtered and self.content_widget.search_bar.input.focus:
+            if filtered and searchbar.input.focus:
                 dropdown.opacity = 1
                 # Позиционируем dropdown под searchbar
                 dropdown.width = searchbar.input.width
@@ -94,8 +114,8 @@ class DatabaseEditorWindow(Screen):
 
     def on_dropdown_select(self, value):
         """Обрабатывает событие выбора станка из списка."""
-        self.content_widget.search_bar.input.text = value
-        self.content_widget.search_bar_dropdown.opacity = 0
+        self.content_widget.left_col.search_bar.input.text = value
+        self.content_widget.left_col.search_bar_dropdown.opacity = 0
 
 
 
