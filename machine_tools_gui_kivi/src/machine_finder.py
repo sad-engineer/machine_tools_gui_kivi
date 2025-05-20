@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from machine_tools import get_finder_with_list_names as finder
 import timeit
+
+from machine_tools import get_finder_with_list_names as finder
 
 MACHINE_TOOL_NAMES = finder().all()
 

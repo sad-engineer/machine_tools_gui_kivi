@@ -4,14 +4,18 @@
 """
 Модуль содержит класс левой колонки редактора базы данных.
 """
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
 
-from machine_tools_gui_kivi.app.components.searchbar import SearchBar
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.spinner import Spinner
+from kivy.uix.textinput import TextInput
+
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
+from machine_tools_gui_kivi.app.components.labeled_spinner import LabeledSpinner
+from machine_tools_gui_kivi.app.components.searchbar import SearchBar
+from machine_tools_gui_kivi.src.descriptions import GROUP_FIELDS_DESCRIPTIONS
 
 
 class LeftColumn(BoxLayout):
@@ -20,7 +24,13 @@ class LeftColumn(BoxLayout):
     """
 
     def __init__(self, debug_mode=False, **kwargs):
-        super().__init__(orientation='vertical', size_hint=(1, 1), spacing=5, padding=[5, 5, 5, 5], **kwargs)
+        super().__init__(
+            orientation="vertical",
+            size_hint=(1, 1),
+            spacing=5,
+            padding=[5, 5, 5, 5],
+            **kwargs
+        )
         self.debug_mode = debug_mode
         self._init_content()
 
@@ -31,18 +41,15 @@ class LeftColumn(BoxLayout):
             size_hint=(1, 1),
             do_scroll_x=False,
             do_scroll_y=True,
-            scroll_type=['bars'],
-            bar_width=10
+            scroll_type=["bars"],
+            bar_width=10,
         )
 
         # Создаем контейнер для полей ввода
         fields_container = GridLayout(
-            cols=1,
-            spacing=5,
-            size_hint_y=None,
-            padding=[0, 0, 0, 0]
+            cols=1, spacing=5, size_hint_y=None, padding=[0, 0, 0, 0]
         )
-        fields_container.bind(minimum_height=fields_container.setter('height'))
+        fields_container.bind(minimum_height=fields_container.setter("height"))
 
         # Создаем и добавляем все виджеты
         self._create_widgets(fields_container)
@@ -62,43 +69,72 @@ class LeftColumn(BoxLayout):
             debug_mode=self.debug_mode,
         )
         self.search_bar.size_hint = (1, None)
-        self.search_bar.pos_hint = {'top': 1}
+        self.search_bar.pos_hint = {"top": 1}
         self.add_widget(self.search_bar)
+
+        self.group_spinner = LabeledSpinner(
+            label_text="Группа станка:",
+            values=GROUP_FIELDS_DESCRIPTIONS,
+            height=65,
+            debug_mode=self.debug_mode,
+        )
+        self.group_spinner.size_hint = (1, None)
+        self.group_spinner.pos_hint = {"top": 1}
+        container.add_widget(self.group_spinner)
 
         # Создаем горизонтальный контейнер для первых двух полей
         first_row = BoxLayout(
-            orientation='horizontal',
+            orientation="horizontal",
             size_hint=(1, None),
             height=65,  # 30 для лейбла + 30 для поля ввода + 5 для отступа
-            spacing=5
+            spacing=5,
         )
-        
+
         # Создаем вертикальные контейнеры для каждого поля
-        group_container = BoxLayout(orientation='vertical', size_hint=(1, None), height=65)
-        type_container = BoxLayout(orientation='vertical', size_hint=(1, None), height=65)
-        
+        group_container = BoxLayout(
+            orientation="vertical", size_hint=(1, None), height=65
+        )
+        type_container = BoxLayout(
+            orientation="vertical", size_hint=(1, None), height=65
+        )
+
         # Добавляем поля в соответствующие контейнеры
-        self._create_label_and_input(group_container, "Группа станка:", "group_input")
+        self._create_label_and_spinner(
+            group_container,
+            "Группа станка:",
+            "group_spinner",
+            GROUP_FIELDS_DESCRIPTIONS,
+        )
         self._create_label_and_input(type_container, "Тип станка:", "type_input")
-        
+
         # Добавляем контейнеры в горизонтальный ряд
         first_row.add_widget(group_container)
         first_row.add_widget(type_container)
-        
+
         # Добавляем горизонтальный ряд в основной контейнер
         container.add_widget(first_row)
-        
+
         # Остальные поля
-        self._create_label_and_input(container, "Тип станка (доп.):", "machine_type_input")
+        self._create_label_and_input(
+            container, "Тип станка (доп.):", "machine_type_input"
+        )
         self._create_label_and_input(container, "Мощность:", "power_input", "кВт")
         self._create_label_and_input(container, "КПД:", "efficiency_input", "%")
         self._create_label_and_input(container, "Точность:", "accuracy_input")
         self._create_label_and_input(container, "Автоматизация:", "automation_input")
-        self._create_label_and_input(container, "Специализация:", "specialization_input")
+        self._create_label_and_input(
+            container, "Специализация:", "specialization_input"
+        )
         self._create_label_and_input(container, "Масса:", "mass_input", "кг")
-        self._create_label_and_input(container, "Класс станка по массе:", "mass_class_input")
-        self._create_label_and_input(container, "Город производства:", "production_city_input")
-        self._create_label_and_input(container, "Организация-производитель:", "organization_input")
+        self._create_label_and_input(
+            container, "Класс станка по массе:", "mass_class_input"
+        )
+        self._create_label_and_input(
+            container, "Город производства:", "production_city_input"
+        )
+        self._create_label_and_input(
+            container, "Организация-производитель:", "organization_input"
+        )
 
         # Добавляем выпадающий список
         self.search_bar_dropdown = DropdownList(
@@ -108,12 +144,12 @@ class LeftColumn(BoxLayout):
             item_spacing=2,
             bar_width=10,
             item_cols=2,
-            opacity=0
+            opacity=0,
         )
 
     def _create_label_and_input(self, container, label_text, input_name, units=None):
         """Создает пару лейбл + поле ввода и добавляет их в контейнер.
-        
+
         Args:
             container: Контейнер для виджетов
             label_text: Текст лейбла
@@ -126,24 +162,19 @@ class LeftColumn(BoxLayout):
             size_hint=(1, None),
             height=30,
             halign="left",
-            valign="middle"
+            valign="middle",
         )
-        label.bind(size=lambda *x: setattr(label, 'text_size', (label.width, label.height)))
+        label.bind(
+            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
+        )
 
         # Создаем контейнер для поля ввода и единиц измерения
         input_container = BoxLayout(
-            orientation='horizontal',
-            size_hint=(1, None),
-            height=30,
-            spacing=5
+            orientation="horizontal", size_hint=(1, None), height=30, spacing=5
         )
 
         # Создаем поле ввода
-        input_field = TextInput(
-            size_hint=(1, None),
-            height=30,
-            halign="left"
-        )
+        input_field = TextInput(size_hint=(1, None), height=30, halign="left")
         input_container.add_widget(input_field)
 
         # Если есть единицы измерения, добавляем их лейбл
@@ -154,9 +185,13 @@ class LeftColumn(BoxLayout):
                 height=30,
                 width=30,
                 halign="left",
-                valign="middle"
+                valign="middle",
             )
-            units_label.bind(size=lambda *x: setattr(units_label, 'text_size', (units_label.width, units_label.height)))
+            units_label.bind(
+                size=lambda *x: setattr(
+                    units_label, "text_size", (units_label.width, units_label.height)
+                )
+            )
             input_container.add_widget(units_label)
 
         # Добавляем в контейнер
@@ -166,10 +201,33 @@ class LeftColumn(BoxLayout):
         # Сохраняем ссылку на поле ввода
         setattr(self, input_name, input_field)
 
+    def _create_label_and_spinner(self, container, label_text, spinner_attr, values):
+        label = Label(
+            text=label_text,
+            size_hint=(1, None),
+            height=30,
+            halign="left",
+            valign="middle",
+        )
+        label.bind(
+            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
+        )
+
+        spinner = Spinner(
+            text=values[0] if values else "",
+            values=values,
+            size_hint=(1, 1),
+            halign="left",
+            valign="middle",
+        )
+        container.add_widget(label)
+        container.add_widget(spinner)
+        setattr(self, spinner_attr, spinner)
+
     def _update_debug(self, instance, value):
         """Обновляет отладочную визуализацию."""
         if self.debug_mode:
             instance.canvas.before.clear()
             with instance.canvas.before:
                 Color(0, 0, 0, 0.3)  # Черный с прозрачностью
-                Rectangle(pos=instance.pos, size=instance.size) 
+                Rectangle(pos=instance.pos, size=instance.size)

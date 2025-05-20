@@ -4,19 +4,20 @@
 """
 Модуль содержит класс окна ввода данных, наследующий от шаблонного окна.
 """
-from kivy.core.window import Window
-from kivy.uix.screenmanager import Screen
-from kivymd.app import MDApp
-from kivy.uix.spinner import Spinner
 import copy
 from typing import Optional
 
-from machine_tools_gui_kivi.app.components.template_window import \
-    TemplateWindow
-from machine_tools_gui_kivi.src.machine_finder import filter_names
-from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
+from kivy.core.window import Window
+from kivy.uix.screenmanager import Screen
+from kivy.uix.spinner import Spinner
+from kivymd.app import MDApp
+from machine_tools import MachineInfo
+from machine_tools import info_by_name as get_info_by_name
+
 from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
-from machine_tools import info_by_name as get_info_by_name, MachineInfo
+from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
+from machine_tools_gui_kivi.app.components.template_window import TemplateWindow
+from machine_tools_gui_kivi.src.machine_finder import filter_names
 
 
 class DatabaseEditorWindow(Screen):
@@ -25,9 +26,9 @@ class DatabaseEditorWindow(Screen):
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(**kwargs)
         self.name = "input_window"
-        self.model : Optional[str] = None
-        self.old_data : Optional[MachineInfo] = None  # Старые данные станка
-        self.new_data : Optional[MachineInfo] = None  # Новые данные станка
+        self.model: Optional[str] = None
+        self.old_data: Optional[MachineInfo] = None  # Старые данные станка
+        self.new_data: Optional[MachineInfo] = None  # Новые данные станка
 
         # Создаем шаблонное окно
         self.template_window = TemplateWindow(
@@ -36,16 +37,21 @@ class DatabaseEditorWindow(Screen):
 
         # Добавляем контент
         self.content_widget = TemplateDatabaseEditor(
-            screen_manager=screen_manager,
-            debug_mode=debug_mode
+            screen_manager=screen_manager, debug_mode=debug_mode
         )
         self.template_window.content.add_widget(self.content_widget)
         self.add_widget(self.template_window)
         self.add_widget(self.content_widget.left_col.search_bar_dropdown)
 
-        self.content_widget.left_col.search_bar.button.bind(on_release=self.on_search_machine)
-        self.content_widget.left_col.search_bar.input.bind(text=self.on_search_input_changed)
-        self.content_widget.left_col.search_bar_dropdown.on_select = self.on_dropdown_select
+        self.content_widget.left_col.search_bar.button.bind(
+            on_release=self.on_search_machine
+        )
+        self.content_widget.left_col.search_bar.input.bind(
+            text=self.on_search_input_changed
+        )
+        self.content_widget.left_col.search_bar_dropdown.on_select = (
+            self.on_dropdown_select
+        )
 
     def on_search_machine(self, instance):
         """Обрабатывает событие нажатия на кнопку поиска."""
@@ -61,18 +67,30 @@ class DatabaseEditorWindow(Screen):
         if isinstance(data, MachineInfo):
             self.content_widget.left_col.group_input.text = str(data.group)
             self.content_widget.left_col.type_input.text = str(data.type)
-            self.content_widget.left_col.machine_type_input.text = str(data.machine_type)
+            self.content_widget.left_col.machine_type_input.text = str(
+                data.machine_type
+            )
             self.content_widget.left_col.power_input.text = str(data.power)
             self.content_widget.left_col.efficiency_input.text = str(data.efficiency)
             self.content_widget.left_col.accuracy_input.text = str(data.accuracy.value)
-            self.content_widget.left_col.automation_input.text = str(data.automation.value)
-            self.content_widget.left_col.specialization_input.text = str(data.specialization.value)
+            self.content_widget.left_col.automation_input.text = str(
+                data.automation.value
+            )
+            self.content_widget.left_col.specialization_input.text = str(
+                data.specialization.value
+            )
             self.content_widget.left_col.mass_input.text = str(data.weight)
-            self.content_widget.left_col.mass_class_input.text = str(data.weight_class.value)
-            self.content_widget.left_col.production_city_input.text = str(data.location.city)
-            self.content_widget.left_col.organization_input.text = str(data.location.manufacturer)
+            self.content_widget.left_col.mass_class_input.text = str(
+                data.weight_class.value
+            )
+            self.content_widget.left_col.production_city_input.text = str(
+                data.location.city
+            )
+            self.content_widget.left_col.organization_input.text = str(
+                data.location.manufacturer
+            )
             print(f"Данные станка: {data}")
-    
+
     def clear_widgets(self):
         """Очищает все виджеты."""
         self.content_widget.left_col.group_input.text = ""
@@ -86,10 +104,9 @@ class DatabaseEditorWindow(Screen):
         self.content_widget.left_col.mass_input.text = ""
         self.content_widget.left_col.mass_class_input.text = ""
         self.content_widget.left_col.production_city_input.text = ""
-        self.content_widget.left_col.organization_input.text = ""       
-        
+        self.content_widget.left_col.organization_input.text = ""
 
-    def on_search_input_changed(self, instance, value:str):
+    def on_search_input_changed(self, instance, value: str):
         """Обрабатывает событие изменения текста в поле ввода."""
         print(value)
         if value != self.model:
@@ -105,8 +122,13 @@ class DatabaseEditorWindow(Screen):
                 dropdown.opacity = 1
                 # Позиционируем dropdown под searchbar
                 dropdown.width = searchbar.input.width
-                dropdown.x = searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[0]
-                dropdown.y = searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1] - dropdown.height
+                dropdown.x = searchbar.input.to_window(
+                    searchbar.input.x, searchbar.input.y
+                )[0]
+                dropdown.y = (
+                    searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1]
+                    - dropdown.height
+                )
             else:
                 dropdown.opacity = 0
         else:
@@ -118,8 +140,8 @@ class DatabaseEditorWindow(Screen):
         self.content_widget.left_col.search_bar_dropdown.opacity = 0
 
 
-
 if __name__ == "__main__":
+
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 
@@ -131,8 +153,6 @@ if __name__ == "__main__":
             return window
 
     TestApp().run()
-
-
 
 
 # # Добавляем шаблон поиска

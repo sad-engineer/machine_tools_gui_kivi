@@ -7,8 +7,8 @@
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 
-from machine_tools_gui_kivi.app.components.searchbar import SearchBar
 from machine_tools_gui_kivi.app.components.database_editor.left_column import LeftColumn
+from machine_tools_gui_kivi.app.components.searchbar import SearchBar
 
 
 class TemplateDatabaseEditor(BoxLayout):
@@ -17,7 +17,9 @@ class TemplateDatabaseEditor(BoxLayout):
     """
 
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
-        super().__init__(orientation="horizontal", spacing=10, padding=[5, 5, 5, 5], **kwargs)
+        super().__init__(
+            orientation="horizontal", spacing=10, padding=[5, 5, 5, 5], **kwargs
+        )
         self.screen_manager = screen_manager
         self.debug_mode = debug_mode
 
@@ -30,7 +32,7 @@ class TemplateDatabaseEditor(BoxLayout):
             debug_mode=self.debug_mode,
         )
         self.search_bar.size_hint = (1, None)
-        self.search_bar.pos_hint = {'top': 1}
+        self.search_bar.pos_hint = {"top": 1}
 
         self._init_content()
 
@@ -67,7 +69,9 @@ class TemplateDatabaseEditor(BoxLayout):
     def _fill_right_column(self):
         """Наполняет правую колонку виджетами."""
         right_col = BoxLayout(orientation="vertical")
-        right_col.bind(pos=self._update_right_col_debug, size=self._update_right_col_debug)
+        right_col.bind(
+            pos=self._update_right_col_debug, size=self._update_right_col_debug
+        )
         return right_col
 
     def _update_right_col_debug(self, instance, value):
