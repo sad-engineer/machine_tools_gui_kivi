@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from machine_tools import GROUP_DESCRIPTIONS, TYPE_DESCRIPTIONS
 from typing import Union
+
+from machine_tools import (ACCURACY_DESCRIPTIONS, GROUP_DESCRIPTIONS,
+                           TYPE_DESCRIPTIONS)
 
 
 def get_group_fields_descriptions() -> list[str]:
@@ -11,11 +13,11 @@ def get_group_fields_descriptions() -> list[str]:
 
     Формат:
     <номер группы>: <описание группы>
-    
+
     Например:
     1: Токарные
-    2: Сверлильные и расточные 
-    3: Шлифовальные, полировальные, доводочные 
+    2: Сверлильные и расточные
+    3: Шлифовальные, полировальные, доводочные
     4: Комбинированные
     5: Зубообрабатывающие и резьбообрабатывающие
     6: Фрезерные
@@ -25,7 +27,7 @@ def get_group_fields_descriptions() -> list[str]:
 
     :return: список описаний групп станков
 
-    Из описания группы удаляется слово "станки" для удобства чтения 
+    Из описания группы удаляется слово "станки" для удобства чтения
     и более короткой записи в выпадающем списке.
     Сами группы определяются в пакете machine_tools.
     """
@@ -49,7 +51,7 @@ def get_type_fields_descriptions(group_id: Union[int, str]) -> list[str]:
 
     Формат:
     <номер типа>: <описание типа>
-    
+
     Например:
     1: Вертикально-сверлильные
     2: Полуавтоматы одношпиндельные
@@ -64,7 +66,7 @@ def get_type_fields_descriptions(group_id: Union[int, str]) -> list[str]:
     :return: список описаний типов станков
 
     Сами типы определяются в пакете machine_tools.
-    """ 
+    """
     group_id = str(group_id)
     fields = []
     for type_, descriptions in TYPE_DESCRIPTIONS.items():
@@ -74,5 +76,18 @@ def get_type_fields_descriptions(group_id: Union[int, str]) -> list[str]:
             fields.append(field)
     return fields
 
-print(get_type_fields_descriptions(3))
 
+def get_accuracy_fields_descriptions() -> list[str]:
+    """
+    Возвращает список описаний точности станков (Только описание).
+    """
+    return ACCURACY_DESCRIPTIONS.values()
+
+
+def get_accuracy_by_description(description: str) -> str:
+    """
+    Возвращает точность станка по его описанию.
+    """
+    return list(ACCURACY_DESCRIPTIONS.keys())[
+        list(ACCURACY_DESCRIPTIONS.values()).index(description)
+    ]

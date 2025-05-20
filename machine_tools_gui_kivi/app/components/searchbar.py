@@ -68,7 +68,8 @@ if __name__ == "__main__":
     from kivy.app import App
     from kivy.uix.floatlayout import FloatLayout
 
-    from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
+    from machine_tools_gui_kivi.app.components.dropdown_list import \
+        DropdownList
 
     class TestSearchBarApp(App):
         def build(self):

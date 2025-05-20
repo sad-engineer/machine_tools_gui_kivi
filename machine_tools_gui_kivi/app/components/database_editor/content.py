@@ -7,7 +7,8 @@
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 
-from machine_tools_gui_kivi.app.components.database_editor.left_column import LeftColumn
+from machine_tools_gui_kivi.app.components.database_editor.left_column import \
+    LeftColumn
 from machine_tools_gui_kivi.app.components.searchbar import SearchBar
 
 

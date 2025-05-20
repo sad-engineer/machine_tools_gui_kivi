@@ -13,9 +13,13 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
-from machine_tools_gui_kivi.app.components.labeled_spinner import LabeledSpinner
+from machine_tools_gui_kivi.app.components.labeled_spinner import \
+    LabeledSpinner
 from machine_tools_gui_kivi.app.components.searchbar import SearchBar
-from machine_tools_gui_kivi.src.descriptions import GROUP_FIELDS_DESCRIPTIONS
+from machine_tools_gui_kivi.src.descriptions import \
+    get_group_fields_descriptions as get_group_fields
+from machine_tools_gui_kivi.src.descriptions import \
+    get_type_fields_descriptions as get_type_fields
 
 
 class LeftColumn(BoxLayout):
@@ -72,9 +76,10 @@ class LeftColumn(BoxLayout):
         self.search_bar.pos_hint = {"top": 1}
         self.add_widget(self.search_bar)
 
+        # Группа станка
         self.group_spinner = LabeledSpinner(
             label_text="Группа станка:",
-            values=GROUP_FIELDS_DESCRIPTIONS,
+            values=get_group_fields(),
             height=65,
             debug_mode=self.debug_mode,
         )
@@ -82,37 +87,16 @@ class LeftColumn(BoxLayout):
         self.group_spinner.pos_hint = {"top": 1}
         container.add_widget(self.group_spinner)
 
-        # Создаем горизонтальный контейнер для первых двух полей
-        first_row = BoxLayout(
-            orientation="horizontal",
-            size_hint=(1, None),
-            height=65,  # 30 для лейбла + 30 для поля ввода + 5 для отступа
-            spacing=5,
+        # Тип станка
+        self.type_spinner = LabeledSpinner(
+            label_text="Тип станка:",
+            values=get_type_fields(self.group_spinner.spinner.text[:1]),
+            height=65,
+            debug_mode=self.debug_mode,
         )
-
-        # Создаем вертикальные контейнеры для каждого поля
-        group_container = BoxLayout(
-            orientation="vertical", size_hint=(1, None), height=65
-        )
-        type_container = BoxLayout(
-            orientation="vertical", size_hint=(1, None), height=65
-        )
-
-        # Добавляем поля в соответствующие контейнеры
-        self._create_label_and_spinner(
-            group_container,
-            "Группа станка:",
-            "group_spinner",
-            GROUP_FIELDS_DESCRIPTIONS,
-        )
-        self._create_label_and_input(type_container, "Тип станка:", "type_input")
-
-        # Добавляем контейнеры в горизонтальный ряд
-        first_row.add_widget(group_container)
-        first_row.add_widget(type_container)
-
-        # Добавляем горизонтальный ряд в основной контейнер
-        container.add_widget(first_row)
+        self.type_spinner.size_hint = (1, None)
+        self.type_spinner.pos_hint = {"top": 1}
+        container.add_widget(self.type_spinner)
 
         # Остальные поля
         self._create_label_and_input(

@@ -14,9 +14,11 @@ from kivymd.app import MDApp
 from machine_tools import MachineInfo
 from machine_tools import info_by_name as get_info_by_name
 
-from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
+from machine_tools_gui_kivi.app.components.database_editor import \
+    TemplateDatabaseEditor
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
-from machine_tools_gui_kivi.app.components.template_window import TemplateWindow
+from machine_tools_gui_kivi.app.components.template_window import \
+    TemplateWindow
 from machine_tools_gui_kivi.src.machine_finder import filter_names
 
 
