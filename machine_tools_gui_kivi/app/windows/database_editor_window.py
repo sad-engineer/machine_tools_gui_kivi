@@ -11,15 +11,16 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen
 from kivy.uix.spinner import Spinner
 from kivymd.app import MDApp
-from machine_tools import MachineInfo
+from machine_tools import MachineInfo, Automation, Specialization, WeightClass, Dimensions, Location
 from machine_tools import info_by_name as get_info_by_name
 
 from machine_tools_gui_kivi.app.components.database_editor import \
     TemplateDatabaseEditor
-from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 from machine_tools_gui_kivi.app.components.template_window import \
     TemplateWindow
 from machine_tools_gui_kivi.src.machine_finder import filter_names
+from machine_tools_gui_kivi.src.descriptions import ACCURACY_DESCRIPTIONS, get_accuracy_by_description
+
 
 
 class DatabaseEditorWindow(Screen):
@@ -55,6 +56,10 @@ class DatabaseEditorWindow(Screen):
             self.on_dropdown_select
         )
 
+        # Переопределяем имя и функцию button1
+        self.template_window.button1.text = "Сохранить"
+        self.template_window.button1.bind(on_release=self.save_data)
+
     def on_search_machine(self, instance):
         """Обрабатывает событие нажатия на кнопку поиска."""
         # Получаем текст из поля ввода
@@ -64,49 +69,7 @@ class DatabaseEditorWindow(Screen):
         self.new_data = copy.deepcopy(self.old_data)
         self.set_widget_data(self.old_data)
 
-    def set_widget_data(self, data: MachineInfo):
-        """Устанавливает данные в виджеты."""
-        if isinstance(data, MachineInfo):
-            self.content_widget.left_col.group_input.text = str(data.group)
-            self.content_widget.left_col.type_input.text = str(data.type)
-            self.content_widget.left_col.machine_type_input.text = str(
-                data.machine_type
-            )
-            self.content_widget.left_col.power_input.text = str(data.power)
-            self.content_widget.left_col.efficiency_input.text = str(data.efficiency)
-            self.content_widget.left_col.accuracy_input.text = str(data.accuracy.value)
-            self.content_widget.left_col.automation_input.text = str(
-                data.automation.value
-            )
-            self.content_widget.left_col.specialization_input.text = str(
-                data.specialization.value
-            )
-            self.content_widget.left_col.mass_input.text = str(data.weight)
-            self.content_widget.left_col.mass_class_input.text = str(
-                data.weight_class.value
-            )
-            self.content_widget.left_col.production_city_input.text = str(
-                data.location.city
-            )
-            self.content_widget.left_col.organization_input.text = str(
-                data.location.manufacturer
-            )
-            print(f"Данные станка: {data}")
 
-    def clear_widgets(self):
-        """Очищает все виджеты."""
-        self.content_widget.left_col.group_input.text = ""
-        self.content_widget.left_col.type_input.text = ""
-        self.content_widget.left_col.machine_type_input.text = ""
-        self.content_widget.left_col.power_input.text = ""
-        self.content_widget.left_col.efficiency_input.text = ""
-        self.content_widget.left_col.accuracy_input.text = ""
-        self.content_widget.left_col.automation_input.text = ""
-        self.content_widget.left_col.specialization_input.text = ""
-        self.content_widget.left_col.mass_input.text = ""
-        self.content_widget.left_col.mass_class_input.text = ""
-        self.content_widget.left_col.production_city_input.text = ""
-        self.content_widget.left_col.organization_input.text = ""
 
     def on_search_input_changed(self, instance, value: str):
         """Обрабатывает событие изменения текста в поле ввода."""
@@ -140,6 +103,87 @@ class DatabaseEditorWindow(Screen):
         """Обрабатывает событие выбора станка из списка."""
         self.content_widget.left_col.search_bar.input.text = value
         self.content_widget.left_col.search_bar_dropdown.opacity = 0
+
+    def clear_widgets(self):
+        """Очищает все виджеты."""
+        self.content_widget.left_col.group_spinner.set_value("")
+        self.content_widget.left_col.type_spinner.set_value("")
+        self.content_widget.left_col.machine_type_input.set_value("")
+        self.content_widget.left_col.power_input.set_value("")
+        self.content_widget.left_col.efficiency_input.set_value("")
+        self.content_widget.left_col.accuracy_spinner.set_value("")
+        self.content_widget.left_col.automation_spinner.set_value("")
+        self.content_widget.left_col.specialization_spinner.set_value("")
+        self.content_widget.left_col.mass_input.set_value("")
+        self.content_widget.left_col.weight_class_spinner.set_value("")
+        self.content_widget.left_col.production_city_input.set_value("")
+        self.content_widget.left_col.organization_input.set_value("")
+        self.content_widget.left_col.length_input.set_value("")
+        self.content_widget.left_col.width_input.set_value("")
+        self.content_widget.left_col.height_input.set_value("")
+
+    def set_widget_data(self, data: MachineInfo):
+        """Устанавливает данные в виджеты."""
+        if isinstance(data, MachineInfo):
+            self.content_widget.left_col.group_spinner.set_value(str(int(data.group)))
+            self.content_widget.left_col.type_spinner.set_value(str(int(data.type)))
+            self.content_widget.left_col.machine_type_input.set_value(
+                str(data.machine_type)
+            )
+            self.content_widget.left_col.power_input.set_value(str(data.power))
+            self.content_widget.left_col.efficiency_input.set_value(str(data.efficiency))
+            self.content_widget.left_col.accuracy_spinner.set_value(ACCURACY_DESCRIPTIONS[data.accuracy.value])
+            self.content_widget.left_col.automation_spinner.set_value(data.automation.value)
+            self.content_widget.left_col.specialization_spinner.set_value(data.specialization.value)
+            self.content_widget.left_col.mass_input.set_value(str(data.weight))
+            self.content_widget.left_col.weight_class_spinner.set_value(data.weight_class.value)
+            self.content_widget.left_col.production_city_input.set_value(
+                data.location.city
+            )
+            self.content_widget.left_col.organization_input.set_value(
+                data.location.manufacturer
+            )
+            self.content_widget.left_col.length_input.set_value(str(data.dimensions.length))
+            self.content_widget.left_col.width_input.set_value(str(data.dimensions.width))
+            self.content_widget.left_col.height_input.set_value(str(data.dimensions.height))
+            print(f"Данные станка: {data}")
+
+    def get_data_from_widgets(self):
+        """Получает данные из виджетов."""
+        machine_info = MachineInfo(
+            name = self.content_widget.left_col.search_bar.input.text,
+            group = self.content_widget.left_col.group_spinner.get_value().split(" ")[0],
+            type = self.content_widget.left_col.type_spinner.get_value().split(" ")[0],
+            power = self.content_widget.left_col.power_input.get_value(),
+            efficiency = self.content_widget.left_col.efficiency_input.get_value(),
+            accuracy = get_accuracy_by_description(self.content_widget.left_col.accuracy_spinner.get_value()),
+            automation = Automation(self.content_widget.left_col.automation_spinner.get_value()),
+            specialization = Specialization(self.content_widget.left_col.specialization_spinner.get_value()),
+            weight = self.content_widget.left_col.mass_input.get_value(),
+            weight_class = WeightClass(self.content_widget.left_col.weight_class_spinner.get_value()),
+            dimensions = Dimensions(
+                length=self.content_widget.left_col.length_input.get_value(),
+                width=self.content_widget.left_col.width_input.get_value(),
+                height=self.content_widget.left_col.height_input.get_value()
+            ),
+            location = Location(
+                city=self.content_widget.left_col.production_city_input.get_value(),
+                manufacturer=self.content_widget.left_col.organization_input.get_value()
+            ),
+            machine_type = self.content_widget.left_col.machine_type_input.get_value()
+        )
+
+        return machine_info
+    
+    def save_data(self, instance):
+        """Сохраняет данные в базу данных."""
+        data = self.get_data_from_widgets()
+        print(f"Данные из виджетов: {data}")
+        print(f"Данные старого станка: {self.old_data}")
+
+
+
+
 
 
 if __name__ == "__main__":

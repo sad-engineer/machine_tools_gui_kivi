@@ -3,8 +3,12 @@
 # ---------------------------------------------------------------------------------------------------------------------
 from typing import Union
 
-from machine_tools import (ACCURACY_DESCRIPTIONS, GROUP_DESCRIPTIONS,
-                           TYPE_DESCRIPTIONS)
+from machine_tools import (
+    ACCURACY_DESCRIPTIONS,
+    GROUP_DESCRIPTIONS,
+    TYPE_DESCRIPTIONS,
+    Accuracy
+)
 
 
 def get_group_fields_descriptions() -> list[str]:
@@ -34,7 +38,7 @@ def get_group_fields_descriptions() -> list[str]:
     fields = []
     for group, descriptions in GROUP_DESCRIPTIONS.items():
         descriptions = descriptions.replace(" станки", "")
-        field = f"{group}: {descriptions}"
+        field = f"{group} : {descriptions}"
         fields.append(field)
     return fields
 
@@ -72,7 +76,7 @@ def get_type_fields_descriptions(group_id: Union[int, str]) -> list[str]:
     for type_, descriptions in TYPE_DESCRIPTIONS.items():
         if type_.startswith(group_id):
             type_ = type_.replace(f"{group_id}, ", "", 1)
-            field = f"{type_}: {descriptions}"
+            field = f"{type_} : {descriptions}"
             fields.append(field)
     return fields
 
@@ -81,13 +85,17 @@ def get_accuracy_fields_descriptions() -> list[str]:
     """
     Возвращает список описаний точности станков (Только описание).
     """
-    return ACCURACY_DESCRIPTIONS.values()
+    return list(ACCURACY_DESCRIPTIONS.values())
 
 
-def get_accuracy_by_description(description: str) -> str:
+def get_accuracy_by_description(description: str) -> Accuracy:
     """
     Возвращает точность станка по его описанию.
     """
-    return list(ACCURACY_DESCRIPTIONS.keys())[
-        list(ACCURACY_DESCRIPTIONS.values()).index(description)
-    ]
+    description_index = list(ACCURACY_DESCRIPTIONS.values()).index(description)
+    accuracy = list(ACCURACY_DESCRIPTIONS.keys())[description_index]
+    accuracy_cls = Accuracy(accuracy)
+    return accuracy_cls
+
+
+

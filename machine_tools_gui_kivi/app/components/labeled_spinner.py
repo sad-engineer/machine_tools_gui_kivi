@@ -5,6 +5,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner, SpinnerOption
+from kivymd.theming import ThemableBehavior
 
 
 class CustomSpinnerOption(SpinnerOption):
@@ -105,10 +106,22 @@ class LabeledSpinner(BoxLayout):
             self.canvas.before.clear()
             self.padding = [2, 2, 2, 2]
             with self.canvas.before:
-                Color(1, 1, 0, 0.3)  # Жёлтый с прозрачностью
+                Color(1, 1, 0, 0.2)  # Жёлтый с прозрачностью
                 Rectangle(pos=self.pos, size=self.size)
         else:
             self.canvas.before.clear()
+
+    def set_value(self, substring):
+        """Устанавливает значение спинера по тексту"""
+        for description in self.spinner.values:
+            if substring in description:
+                self.spinner.text = description
+                return True
+        return False
+
+    def get_value(self):
+        """Возвращает значение спинера."""
+        return self.spinner.text
 
 
 if __name__ == "__main__":

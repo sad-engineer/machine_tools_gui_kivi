@@ -15,11 +15,40 @@ from kivy.uix.textinput import TextInput
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 from machine_tools_gui_kivi.app.components.labeled_spinner import \
     LabeledSpinner
+from machine_tools_gui_kivi.app.components.labeled_input import \
+    LabeledInput
 from machine_tools_gui_kivi.app.components.searchbar import SearchBar
 from machine_tools_gui_kivi.src.descriptions import \
     get_group_fields_descriptions as get_group_fields
 from machine_tools_gui_kivi.src.descriptions import \
     get_type_fields_descriptions as get_type_fields
+from machine_tools_gui_kivi.src.descriptions import get_accuracy_fields_descriptions as get_accuracy_fields
+from machine_tools import Automation, Specialization, WeightClass
+
+
+def get_custom_spinner(label_text: str, values: list, debug_mode: bool = False) -> LabeledSpinner:
+    """Настраивает спиннер."""
+    spinner = LabeledSpinner(
+            label_text=label_text,
+            values=values,
+            height=65,
+            debug_mode=debug_mode,
+    )
+    spinner.size_hint = (1, None)
+    spinner.pos_hint = {"top": 1}
+    return spinner
+
+
+def get_custom_input(label_text: str, units: str = None, debug_mode: bool = False) -> LabeledInput:
+    """Настраивает поле ввода."""
+    input = LabeledInput(
+        label_text=label_text,
+        units=units,
+        debug_mode=debug_mode,
+    )
+    input.size_hint = (1, None)
+    input.pos_hint = {"top": 1}
+    return input
 
 
 class LeftColumn(BoxLayout):
@@ -77,48 +106,85 @@ class LeftColumn(BoxLayout):
         self.add_widget(self.search_bar)
 
         # Группа станка
-        self.group_spinner = LabeledSpinner(
-            label_text="Группа станка:",
-            values=get_group_fields(),
-            height=65,
-            debug_mode=self.debug_mode,
-        )
-        self.group_spinner.size_hint = (1, None)
-        self.group_spinner.pos_hint = {"top": 1}
+        self.group_spinner = get_custom_spinner("Группа станка:", get_group_fields(), self.debug_mode)
         container.add_widget(self.group_spinner)
 
         # Тип станка
-        self.type_spinner = LabeledSpinner(
-            label_text="Тип станка:",
-            values=get_type_fields(self.group_spinner.spinner.text[:1]),
-            height=65,
-            debug_mode=self.debug_mode,
+        self.type_spinner = get_custom_spinner(
+            "Тип станка:", get_type_fields(self.group_spinner.spinner.text[:1]), self.debug_mode
         )
-        self.type_spinner.size_hint = (1, None)
-        self.type_spinner.pos_hint = {"top": 1}
         container.add_widget(self.type_spinner)
 
-        # Остальные поля
-        self._create_label_and_input(
-            container, "Тип станка (доп.):", "machine_type_input"
+        # Расшифровка типа станка
+        self.machine_type_input = get_custom_input("Тип станка (доп.):", debug_mode=self.debug_mode)
+        container.add_widget(self.machine_type_input)
+
+        # Мощность, КПД и Автоматизация в одну строку
+        horizontal_container = BoxLayout(
+            orientation="horizontal",
+            size_hint=(1, None),
+            height=65,
+            spacing=5
         )
-        self._create_label_and_input(container, "Мощность:", "power_input", "кВт")
-        self._create_label_and_input(container, "КПД:", "efficiency_input", "%")
-        self._create_label_and_input(container, "Точность:", "accuracy_input")
-        self._create_label_and_input(container, "Автоматизация:", "automation_input")
-        self._create_label_and_input(
-            container, "Специализация:", "specialization_input"
+        # Мощность
+        self.power_input = get_custom_input("Мощность:", "кВт", debug_mode=self.debug_mode)
+        horizontal_container.add_widget(self.power_input)
+        # КПД
+        self.efficiency_input = get_custom_input("КПД:", "%", debug_mode=self.debug_mode)
+        horizontal_container.add_widget(self.efficiency_input)
+        # Автоматизация
+        self.automation_spinner = get_custom_spinner("Автоматизация:", Automation.get_values(), self.debug_mode)
+        horizontal_container.add_widget(self.automation_spinner)
+        container.add_widget(horizontal_container)
+
+        # Точность станка
+        self.accuracy_spinner = get_custom_spinner("Точность станка:", get_accuracy_fields(), self.debug_mode)
+        container.add_widget(self.accuracy_spinner)
+
+        
+        # Специализация
+        self.specialization_spinner = get_custom_spinner("Специализация:", Specialization.get_values(), self.debug_mode)
+        container.add_widget(self.specialization_spinner)
+
+        # Масса и Класс станка по массе в одну строку
+        horizontal_container_1 = BoxLayout(
+            orientation="horizontal",
+            size_hint=(1, None),
+            height=65,
+            spacing=5
         )
-        self._create_label_and_input(container, "Масса:", "mass_input", "кг")
-        self._create_label_and_input(
-            container, "Класс станка по массе:", "mass_class_input"
+        # Масса
+        self.mass_input = get_custom_input("Масса:", "кг", debug_mode=self.debug_mode)
+        horizontal_container_1.add_widget(self.mass_input)
+        # Класс станка по массе
+        self.weight_class_spinner = get_custom_spinner("Класс станка по массе:", WeightClass.get_values(), self.debug_mode)
+        horizontal_container_1.add_widget(self.weight_class_spinner)
+        container.add_widget(horizontal_container_1)
+
+        # Размеры
+        label_1 = Label(text="Размеры:", size_hint=(1, None), height=30)
+        container.add_widget(label_1)
+        horizontal_container_2 = BoxLayout(
+            orientation="horizontal",
+            size_hint=(1, None),
+            height=65,
+            spacing=5
         )
-        self._create_label_and_input(
-            container, "Город производства:", "production_city_input"
-        )
-        self._create_label_and_input(
-            container, "Организация-производитель:", "organization_input"
-        )
+        self.length_input = get_custom_input("Длина:", "мм", debug_mode=self.debug_mode)
+        horizontal_container_2.add_widget(self.length_input)
+        self.width_input = get_custom_input("Ширина:", "мм", debug_mode=self.debug_mode)
+        horizontal_container_2.add_widget(self.width_input)
+        self.height_input = get_custom_input("Высота:", "мм", debug_mode=self.debug_mode)
+        horizontal_container_2.add_widget(self.height_input)
+        container.add_widget(horizontal_container_2)    
+
+        # Город производства
+        self.production_city_input = get_custom_input("Город производства:", debug_mode=self.debug_mode)
+        container.add_widget(self.production_city_input)
+
+        # Организация-производитель
+        self.organization_input = get_custom_input("Организация-производитель:", debug_mode=self.debug_mode)
+        container.add_widget(self.organization_input)
 
         # Добавляем выпадающий список
         self.search_bar_dropdown = DropdownList(
@@ -130,88 +196,3 @@ class LeftColumn(BoxLayout):
             item_cols=2,
             opacity=0,
         )
-
-    def _create_label_and_input(self, container, label_text, input_name, units=None):
-        """Создает пару лейбл + поле ввода и добавляет их в контейнер.
-
-        Args:
-            container: Контейнер для виджетов
-            label_text: Текст лейбла
-            input_name: Имя атрибута для поля ввода
-            units: Единицы измерения (опционально)
-        """
-        # Создаем лейбл
-        label = Label(
-            text=label_text,
-            size_hint=(1, None),
-            height=30,
-            halign="left",
-            valign="middle",
-        )
-        label.bind(
-            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
-        )
-
-        # Создаем контейнер для поля ввода и единиц измерения
-        input_container = BoxLayout(
-            orientation="horizontal", size_hint=(1, None), height=30, spacing=5
-        )
-
-        # Создаем поле ввода
-        input_field = TextInput(size_hint=(1, None), height=30, halign="left")
-        input_container.add_widget(input_field)
-
-        # Если есть единицы измерения, добавляем их лейбл
-        if units:
-            units_label = Label(
-                text=units,
-                size_hint=(None, None),
-                height=30,
-                width=30,
-                halign="left",
-                valign="middle",
-            )
-            units_label.bind(
-                size=lambda *x: setattr(
-                    units_label, "text_size", (units_label.width, units_label.height)
-                )
-            )
-            input_container.add_widget(units_label)
-
-        # Добавляем в контейнер
-        container.add_widget(label)
-        container.add_widget(input_container)
-
-        # Сохраняем ссылку на поле ввода
-        setattr(self, input_name, input_field)
-
-    def _create_label_and_spinner(self, container, label_text, spinner_attr, values):
-        label = Label(
-            text=label_text,
-            size_hint=(1, None),
-            height=30,
-            halign="left",
-            valign="middle",
-        )
-        label.bind(
-            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
-        )
-
-        spinner = Spinner(
-            text=values[0] if values else "",
-            values=values,
-            size_hint=(1, 1),
-            halign="left",
-            valign="middle",
-        )
-        container.add_widget(label)
-        container.add_widget(spinner)
-        setattr(self, spinner_attr, spinner)
-
-    def _update_debug(self, instance, value):
-        """Обновляет отладочную визуализацию."""
-        if self.debug_mode:
-            instance.canvas.before.clear()
-            with instance.canvas.before:
-                Color(0, 0, 0, 0.3)  # Черный с прозрачностью
-                Rectangle(pos=instance.pos, size=instance.size)

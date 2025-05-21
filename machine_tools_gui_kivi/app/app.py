@@ -11,9 +11,9 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 
-Config.set("input", "mouse", "mouse,multitouch_on_demand")
-
 from machine_tools_gui_kivi.app.windows import DatabaseEditorWindow
+
+Config.set("input", "mouse", "mouse, multitouch_on_demand")
 
 
 class MainScreen(Screen):
