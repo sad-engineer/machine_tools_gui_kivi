@@ -44,9 +44,7 @@ class TemplateWindow(FloatLayout):
             current_width = Window.width
             current_height = Window.height
             Window.size = (current_width + 1, current_height + 1)
-            Clock.schedule_once(
-                lambda dt: setattr(Window, "size", (current_width, current_height)), 0.1
-            )
+            Clock.schedule_once(lambda dt: setattr(Window, "size", (current_width, current_height)), 0.1)
 
         Clock.schedule_once(trigger_resize, 0)
 
@@ -111,12 +109,8 @@ class TemplateWindow(FloatLayout):
             padding=[0, 0, 0, 5],
         )
         self.max_button_width = 200
-        self.button1 = Button(
-            text="Кнопка 1", size_hint=(None, 1), width=self.max_button_width
-        )
-        self.button2 = Button(
-            text="Кнопка 2", size_hint=(None, 1), width=self.max_button_width
-        )
+        self.button1 = Button(text="Кнопка 1", size_hint=(None, 1), width=self.max_button_width)
+        self.button2 = Button(text="Кнопка 2", size_hint=(None, 1), width=self.max_button_width)
         self.buttons_box.add_widget(self.button1)
         self.buttons_box.add_widget(self.button2)
         self.root_box.add_widget(self.buttons_box)
@@ -217,9 +211,7 @@ if __name__ == "__main__":
             window.button1.bind(on_release=lambda instance: print("Нажата кнопка 'OK'"))
 
             window.button2.text = "Cancel"
-            window.button2.bind(
-                on_release=lambda instance: print("Нажата кнопка 'Cancel'")
-            )
+            window.button2.bind(on_release=lambda instance: print("Нажата кнопка 'Cancel'"))
 
             # Пример добавления дополнительной кнопки
             extra_button = Button(

@@ -8,23 +8,8 @@ from kivy.uix.textinput import TextInput
 
 
 class LabeledInput(BoxLayout):
-    def __init__(
-        self,
-        label_text,
-        input_text="",
-        units=None,
-        height=65,
-        spacing=5,
-        debug_mode=False,
-        **kwargs
-    ):
-        super().__init__(
-            orientation="vertical",
-            size_hint=(1, None),
-            height=height,
-            spacing=spacing,
-            **kwargs
-        )
+    def __init__(self, label_text, input_text="", units=None, height=65, spacing=5, debug_mode=False, **kwargs):
+        super().__init__(orientation="vertical", size_hint=(1, None), height=height, spacing=spacing, **kwargs)
         self.debug_mode = debug_mode
 
         # Лейбл
@@ -35,15 +20,11 @@ class LabeledInput(BoxLayout):
             halign="left",
             valign="middle",
         )
-        label.bind(
-            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
-        )
+        label.bind(size=lambda *x: setattr(label, "text_size", (label.width, label.height)))
         self.label = label
 
         # Контейнер для поля ввода и единиц измерения
-        input_container = BoxLayout(
-            orientation="horizontal", size_hint=(1, None), height=30, spacing=5
-        )
+        input_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=30, spacing=5)
 
         # Поле ввода
         input_field = TextInput(
@@ -51,7 +32,6 @@ class LabeledInput(BoxLayout):
             size_hint=(1, None),
             height=30,
             halign="left",
-
         )
         self.input_field = input_field
         input_container.add_widget(input_field)
@@ -66,11 +46,7 @@ class LabeledInput(BoxLayout):
                 halign="left",
                 valign="middle",
             )
-            units_label.bind(
-                size=lambda *x: setattr(
-                    units_label, "text_size", (units_label.width, units_label.height)
-                )
-            )
+            units_label.bind(size=lambda *x: setattr(units_label, "text_size", (units_label.width, units_label.height)))
             input_container.add_widget(units_label)
 
         self.add_widget(self.label)
@@ -86,7 +62,7 @@ class LabeledInput(BoxLayout):
             self.canvas.before.clear()
             self.padding = [2, 2, 2, 2]
             with self.canvas.before:
-                Color(0, 1, 1, 0.2)  # Синий с прозрачностью
+                Color(0, 1, 1, 0.2)
                 Rectangle(pos=self.pos, size=self.size)
         else:
             self.canvas.before.clear()
@@ -94,7 +70,7 @@ class LabeledInput(BoxLayout):
     def set_value(self, string):
         """Устанавливает значение поля ввода."""
         self.input_field.text = string
-    
+
     def get_value(self):
         """Возвращает значение поля ввода."""
         return self.input_field.text
@@ -109,7 +85,7 @@ if __name__ == "__main__":
         def build(self):
             Window.size = (400, 120)
             root = FloatLayout()
-            
+
             labeled_input = LabeledInput(
                 label_text="Название:",
                 input_text="Тестовое значение",
@@ -121,4 +97,4 @@ if __name__ == "__main__":
             root.add_widget(labeled_input)
             return root
 
-    TestLabeledInputApp().run() 
+    TestLabeledInputApp().run()

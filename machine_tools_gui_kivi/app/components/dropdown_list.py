@@ -18,16 +18,7 @@ class DropdownList(ScrollView):
     item_cols - количество колонок в списке
     """
 
-    def __init__(
-        self,
-        on_select=None,
-        height=200,
-        item_height=30,
-        item_spacing=2,
-        bar_width=10,
-        item_cols=1,
-        **kwargs
-    ):
+    def __init__(self, on_select=None, height=200, item_height=30, item_spacing=2, bar_width=10, item_cols=1, **kwargs):
         super().__init__(**kwargs)
         self.bar_width = bar_width
         self.scroll_type = ["bars", "content"]
@@ -37,9 +28,7 @@ class DropdownList(ScrollView):
         self.btn_item_spacing = item_spacing
 
         # Создаем сетку для элементов списка
-        self.grid = GridLayout(
-            cols=item_cols, spacing=self.btn_item_spacing, size_hint_y=None
-        )
+        self.grid = GridLayout(cols=item_cols, spacing=self.btn_item_spacing, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter("height"))
         self.add_widget(self.grid)
 
@@ -55,10 +44,7 @@ class DropdownList(ScrollView):
                 )
                 btn.bind(on_release=lambda btn, item=item: self._on_item_select(item))
                 self.grid.add_widget(btn)
-            height = (
-                len(items) * (self.btn_item_height + self.btn_item_spacing)
-                - self.btn_item_spacing
-            )
+            height = len(items) * (self.btn_item_height + self.btn_item_spacing) - self.btn_item_spacing
             self.height = min(self.dropdown_height, height)
             self.opacity = 1
         else:
@@ -76,7 +62,6 @@ if __name__ == "__main__":
     from kivy.app import App
     from kivy.uix.floatlayout import FloatLayout
     from kivy.uix.textinput import TextInput
-    from kivy.uix.widget import Widget
 
     class TestDropdownApp(App):
         def build(self):
@@ -116,11 +101,7 @@ if __name__ == "__main__":
                 "Melon",
                 "Lemon",
             ]
-            filtered = (
-                [opt for opt in options if value.lower() in opt.lower()]
-                if value
-                else []
-            )
+            filtered = [opt for opt in options if value.lower() in opt.lower()] if value else []
             self.dropdown.update_items(filtered)
             # Показываем список только если есть варианты и поле в фокусе
             if filtered and self.input.focus:

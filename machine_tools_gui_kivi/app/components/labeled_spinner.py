@@ -5,17 +5,16 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner, SpinnerOption
-from kivymd.theming import ThemableBehavior
 
 
 class CustomSpinnerOption(SpinnerOption):
     def __init__(self, **kwargs):
-        row_height = kwargs.pop("row_height", 100)  # Извлекаем row_height из kwargs
+        row_height = kwargs.pop("row_height", 100)
         super().__init__(**kwargs)
         self.height = row_height
         self.valign = "middle"
         self.halign = "left"
-        self.padding = [10, 0, 0, 0]  # [left, top, right, bottom] отступы
+        self.padding = [10, 0, 0, 0]
         self.bind(size=self._update_text_size)
         self._update_text_size()
 
@@ -29,23 +28,9 @@ class CustomSpinnerOption(SpinnerOption):
 
 class LabeledSpinner(BoxLayout):
     def __init__(
-        self,
-        label_text,
-        values,
-        spinner_text=None,
-        height=65,
-        spacing=5,
-        debug_mode=False,
-        row_height=30,
-        **kwargs
+        self, label_text, values, spinner_text=None, height=65, spacing=5, debug_mode=False, row_height=30, **kwargs
     ):
-        super().__init__(
-            orientation="vertical",
-            size_hint=(1, None),
-            height=height,
-            spacing=spacing,
-            **kwargs
-        )
+        super().__init__(orientation="vertical", size_hint=(1, None), height=height, spacing=spacing, **kwargs)
         self.debug_mode = debug_mode
         # Лейбл
         label = Label(
@@ -55,9 +40,7 @@ class LabeledSpinner(BoxLayout):
             halign="left",
             valign="middle",
         )
-        label.bind(
-            size=lambda *x: setattr(label, "text_size", (label.width, label.height))
-        )
+        label.bind(size=lambda *x: setattr(label, "text_size", (label.width, label.height)))
         self.label = label
         # Выпадающий список
         spinner = Spinner(
@@ -66,10 +49,8 @@ class LabeledSpinner(BoxLayout):
             size_hint=(1, 1),
             halign="left",
             valign="middle",
-            padding=[10, 0, 0, 0],  # [left, top, right, bottom] отступы
-            option_cls=lambda **opt_kwargs: CustomSpinnerOption(
-                row_height=row_height, **opt_kwargs
-            ),
+            padding=[10, 0, 0, 0],
+            option_cls=lambda **opt_kwargs: CustomSpinnerOption(row_height=row_height, **opt_kwargs),
         )
         spinner.bind(
             size=lambda *x: setattr(
@@ -93,12 +74,10 @@ class LabeledSpinner(BoxLayout):
     def on_touch_down(self, touch):
         """Обработка нажатия мыши"""
         if self.collide_point(*touch.pos):
-            if touch.button == "right":  # Правая кнопка мыши
-                self.spinner.text = ""  # Очищаем текст
-                return True  # Обработка события завершена
-        return super().on_touch_down(
-            touch
-        )  # Для других случаев используем стандартную обработку
+            if touch.button == "right":
+                self.spinner.text = ""
+                return True
+        return super().on_touch_down(touch)
 
     def _update_debug_bg(self, *args):
         """Обновляет фон для отладки"""
@@ -106,7 +85,7 @@ class LabeledSpinner(BoxLayout):
             self.canvas.before.clear()
             self.padding = [2, 2, 2, 2]
             with self.canvas.before:
-                Color(1, 1, 0, 0.2)  # Жёлтый с прозрачностью
+                Color(1, 1, 0, 0.2)
                 Rectangle(pos=self.pos, size=self.size)
         else:
             self.canvas.before.clear()

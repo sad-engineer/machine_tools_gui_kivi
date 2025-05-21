@@ -9,17 +9,14 @@ from typing import Optional
 
 from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen
-from kivy.uix.spinner import Spinner
 from kivymd.app import MDApp
-from machine_tools import MachineInfo, Automation, Specialization, WeightClass, Dimensions, Location
+from machine_tools import Automation, Dimensions, Location, MachineInfo, Specialization, WeightClass
 from machine_tools import info_by_name as get_info_by_name
 
-from machine_tools_gui_kivi.app.components.database_editor import \
-    TemplateDatabaseEditor
-from machine_tools_gui_kivi.app.components.template_window import \
-    TemplateWindow
-from machine_tools_gui_kivi.src.machine_finder import filter_names
+from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
+from machine_tools_gui_kivi.app.components.template_window import TemplateWindow
 from machine_tools_gui_kivi.src.descriptions import ACCURACY_DESCRIPTIONS, get_accuracy_by_description
+from machine_tools_gui_kivi.src.machine_finder import filter_names
 
 
 class DatabaseEditorWindow(Screen):
@@ -33,30 +30,22 @@ class DatabaseEditorWindow(Screen):
         self.new_data: Optional[MachineInfo] = None  # Новые данные станка
 
         # Создаем шаблонное окно
-        self.template_window = TemplateWindow(
-            screen_manager=screen_manager, debug_mode=debug_mode
-        )
+        self.template_window = TemplateWindow(screen_manager=screen_manager, debug_mode=debug_mode)
 
         # Добавляем контент
         self.content_widget = TemplateDatabaseEditor(
             screen_manager=screen_manager,
             debug_mode=debug_mode,
             on_technical_requirements_change=self._on_technical_requirements_change,
-            on_technical_requirement_name_change=self._on_technical_requirement_name_change
+            on_technical_requirement_name_change=self._on_technical_requirement_name_change,
         )
         self.template_window.content.add_widget(self.content_widget)
         self.add_widget(self.template_window)
         self.add_widget(self.content_widget.left_col.search_bar_dropdown)
 
-        self.content_widget.left_col.search_bar.button.bind(
-            on_release=self.on_search_machine
-        )
-        self.content_widget.left_col.search_bar.input.bind(
-            text=self.on_search_input_changed
-        )
-        self.content_widget.left_col.search_bar_dropdown.on_select = (
-            self.on_dropdown_select
-        )
+        self.content_widget.left_col.search_bar.button.bind(on_release=self.on_search_machine)
+        self.content_widget.left_col.search_bar.input.bind(text=self.on_search_input_changed)
+        self.content_widget.left_col.search_bar_dropdown.on_select = self.on_dropdown_select
 
         # Переопределяем имя и функцию button1
         self.template_window.button1.text = "Сохранить"
@@ -65,7 +54,7 @@ class DatabaseEditorWindow(Screen):
     def _on_technical_requirements_change(self, property_name, value):
         """
         Обработчик изменения технических требований.
-        
+
         Args:
             property_name: Название свойства
             value: Новое значение
@@ -78,7 +67,7 @@ class DatabaseEditorWindow(Screen):
     def _on_technical_requirement_name_change(self, old_name, new_name):
         """
         Обработчик изменения названия технического требования.
-        
+
         Args:
             old_name: Старое название требования
             new_name: Новое название требования
@@ -120,13 +109,8 @@ class DatabaseEditorWindow(Screen):
                 dropdown.opacity = 1
                 # Позиционируем dropdown под searchbar
                 dropdown.width = searchbar.input.width
-                dropdown.x = searchbar.input.to_window(
-                    searchbar.input.x, searchbar.input.y
-                )[0]
-                dropdown.y = (
-                        searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1]
-                        - dropdown.height
-                )
+                dropdown.x = searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[0]
+                dropdown.y = searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1] - dropdown.height
             else:
                 dropdown.opacity = 0
         else:
@@ -161,9 +145,7 @@ class DatabaseEditorWindow(Screen):
         if isinstance(data, MachineInfo):
             self.content_widget.left_col.group_spinner.set_value(str(int(data.group)))
             self.content_widget.left_col.type_spinner.set_value(str(int(data.type)))
-            self.content_widget.left_col.machine_type_input.set_value(
-                str(data.machine_type)
-            )
+            self.content_widget.left_col.machine_type_input.set_value(str(data.machine_type))
             self.content_widget.left_col.power_input.set_value(str(data.power))
             self.content_widget.left_col.efficiency_input.set_value(str(data.efficiency))
             self.content_widget.left_col.accuracy_spinner.set_value(ACCURACY_DESCRIPTIONS[data.accuracy.value])
@@ -171,19 +153,14 @@ class DatabaseEditorWindow(Screen):
             self.content_widget.left_col.specialization_spinner.set_value(data.specialization.value)
             self.content_widget.left_col.mass_input.set_value(str(data.weight))
             self.content_widget.left_col.weight_class_spinner.set_value(data.weight_class.value)
-            self.content_widget.left_col.production_city_input.set_value(
-                data.location.city
-            )
-            self.content_widget.left_col.organization_input.set_value(
-                data.location.manufacturer
-            )
+            self.content_widget.left_col.production_city_input.set_value(data.location.city)
+            self.content_widget.left_col.organization_input.set_value(data.location.manufacturer)
             self.content_widget.left_col.length_input.set_value(str(data.dimensions.length))
             self.content_widget.left_col.width_input.set_value(str(data.dimensions.width))
             self.content_widget.left_col.height_input.set_value(str(data.dimensions.height))
             self.content_widget.left_col.overall_diameter_input.set_value(str(data.dimensions.overall_diameter))
             self.content_widget.right_col.update_properties(data.technical_requirements)
             print(f"Данные станка: {data}")
-
 
     def get_data_from_widgets(self):
         """Получает данные из виджетов."""
@@ -202,13 +179,13 @@ class DatabaseEditorWindow(Screen):
                 length=self.content_widget.left_col.length_input.get_value(),
                 width=self.content_widget.left_col.width_input.get_value(),
                 height=self.content_widget.left_col.height_input.get_value(),
-                overall_diameter=self.content_widget.left_col.overall_diameter_input.get_value()
+                overall_diameter=self.content_widget.left_col.overall_diameter_input.get_value(),
             ),
             location=Location(
                 city=self.content_widget.left_col.production_city_input.get_value(),
-                manufacturer=self.content_widget.left_col.organization_input.get_value()
+                manufacturer=self.content_widget.left_col.organization_input.get_value(),
             ),
-            machine_type=self.content_widget.left_col.machine_type_input.get_value()
+            machine_type=self.content_widget.left_col.machine_type_input.get_value(),
         )
 
         return machine_info
@@ -221,6 +198,7 @@ class DatabaseEditorWindow(Screen):
 
 
 if __name__ == "__main__":
+
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 
@@ -230,7 +208,6 @@ if __name__ == "__main__":
             Window.minimum_height = 600
             window = DatabaseEditorWindow(debug_mode=True)
             return window
-
 
     TestApp().run()
 

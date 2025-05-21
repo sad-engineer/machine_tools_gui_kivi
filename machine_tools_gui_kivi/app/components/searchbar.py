@@ -35,9 +35,7 @@ class SearchBar(BoxLayout):
         self.height = height
 
         # Горизонтальный контейнер для поля и кнопки
-        search_box = BoxLayout(
-            orientation="horizontal", size_hint=(1, None), height=height, spacing=2
-        )
+        search_box = BoxLayout(orientation="horizontal", size_hint=(1, None), height=height, spacing=2)
 
         self.input = TextInput(
             hint_text=input_hint,
@@ -51,15 +49,11 @@ class SearchBar(BoxLayout):
             text=button_text,
             size_hint=(1 - input_ratio, 1),
             text_size=(None, None),
-            halign='center',
-            valign='middle',
-            font_size='12sp'  # Уменьшаем размер шрифта
+            halign="center",
+            valign="middle",
+            font_size="12sp",  # Уменьшаем размер шрифта
         )
-        self.button.bind(
-            size=lambda *x: setattr(
-                self.button, "text_size", (self.button.width, self.button.height)
-            )
-        )
+        self.button.bind(size=lambda *x: setattr(self.button, "text_size", (self.button.width, self.button.height)))
 
         search_box.add_widget(self.input)
         search_box.add_widget(self.button)
@@ -81,8 +75,7 @@ if __name__ == "__main__":
     from kivy.app import App
     from kivy.uix.floatlayout import FloatLayout
 
-    from machine_tools_gui_kivi.app.components.dropdown_list import \
-        DropdownList
+    from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 
     class TestSearchBarApp(App):
         def build(self):
@@ -100,13 +93,13 @@ if __name__ == "__main__":
 
             # --- Добавляем выпадающий список ---
             self.dropdown = DropdownList(
-                size_hint=(0.7, None),  # ширина совпадает с полем ввода
+                size_hint=(0.7, None),
                 height=150,
                 item_height=30,
                 item_spacing=2,
                 bar_width=10,
                 item_cols=1,
-                opacity=0,  # изначально скрыт
+                opacity=0,
             )
             root.add_widget(self.dropdown)
 
@@ -130,24 +123,16 @@ if __name__ == "__main__":
                 "Melon",
                 "Lemon",
             ]
-            filtered = (
-                [opt for opt in options if value.lower() in opt.lower()]
-                if value
-                else []
-            )
+            filtered = [opt for opt in options if value.lower() in opt.lower()] if value else []
             self.dropdown.update_items(filtered)
             # Показываем список только если есть варианты и поле в фокусе
             if filtered and self.searchbar.input.focus:
                 self.dropdown.opacity = 1
                 # Позиционируем dropdown под searchbar
                 self.dropdown.width = self.searchbar.input.width
-                self.dropdown.x = self.searchbar.input.to_window(
-                    self.searchbar.input.x, self.searchbar.input.y
-                )[0]
+                self.dropdown.x = self.searchbar.input.to_window(self.searchbar.input.x, self.searchbar.input.y)[0]
                 self.dropdown.y = (
-                    self.searchbar.input.to_window(
-                        self.searchbar.input.x, self.searchbar.input.y
-                    )[1]
+                    self.searchbar.input.to_window(self.searchbar.input.x, self.searchbar.input.y)[1]
                     - self.dropdown.height
                 )
             else:

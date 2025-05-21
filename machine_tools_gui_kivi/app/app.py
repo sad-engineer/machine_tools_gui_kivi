@@ -74,9 +74,7 @@ class WorkshopDesignApp(MDApp):
 
     def toggle_theme(self, instance):
         """Переключает между светлой и темной темой."""
-        self.theme_cls.theme_style = (
-            "Dark" if self.theme_cls.theme_style == "Light" else "Light"
-        )
+        self.theme_cls.theme_style = "Dark" if self.theme_cls.theme_style == "Light" else "Light"
 
     def show_settings(self, instance):
         """Показывает окно настроек."""
