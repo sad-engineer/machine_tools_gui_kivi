@@ -80,7 +80,7 @@ class LeftColumn(BoxLayout):
 
         # Создаем контейнер для полей ввода
         fields_container = GridLayout(
-            cols=1, spacing=5, size_hint_y=None, padding=[0, 0, 0, 0]
+            cols=1, spacing=5, size_hint_y=None, padding=[0, 0, 10, 0]
         )
         fields_container.bind(minimum_height=fields_container.setter("height"))
 
@@ -96,7 +96,7 @@ class LeftColumn(BoxLayout):
         # Поле поиска
         self.search_bar = SearchBar(
             input_hint="Введите название станка",
-            button_text="Поиск",
+            button_text="Загрузить\nиз БД",
             input_ratio=0.8,
             height=35,
             debug_mode=self.debug_mode,
@@ -177,6 +177,10 @@ class LeftColumn(BoxLayout):
         self.height_input = get_custom_input("Высота:", "мм", debug_mode=self.debug_mode)
         horizontal_container_2.add_widget(self.height_input)
         container.add_widget(horizontal_container_2)    
+
+        # Размеры рабочей зоны
+        self.overall_diameter_input = get_custom_input("Размеры рабочей зоны:", "мм", debug_mode=self.debug_mode)
+        container.add_widget(self.overall_diameter_input)
 
         # Город производства
         self.production_city_input = get_custom_input("Город производства:", debug_mode=self.debug_mode)

@@ -22,7 +22,6 @@ from machine_tools_gui_kivi.src.machine_finder import filter_names
 from machine_tools_gui_kivi.src.descriptions import ACCURACY_DESCRIPTIONS, get_accuracy_by_description
 
 
-
 class DatabaseEditorWindow(Screen):
     """Окно ввода данных, обертка для TemplateWindow."""
 
@@ -40,7 +39,10 @@ class DatabaseEditorWindow(Screen):
 
         # Добавляем контент
         self.content_widget = TemplateDatabaseEditor(
-            screen_manager=screen_manager, debug_mode=debug_mode
+            screen_manager=screen_manager,
+            debug_mode=debug_mode,
+            on_technical_requirements_change=self._on_technical_requirements_change,
+            on_technical_requirement_name_change=self._on_technical_requirement_name_change
         )
         self.template_window.content.add_widget(self.content_widget)
         self.add_widget(self.template_window)
@@ -60,6 +62,39 @@ class DatabaseEditorWindow(Screen):
         self.template_window.button1.text = "Сохранить"
         self.template_window.button1.bind(on_release=self.save_data)
 
+    def _on_technical_requirements_change(self, property_name, value):
+        """
+        Обработчик изменения технических требований.
+        
+        Args:
+            property_name: Название свойства
+            value: Новое значение
+        """
+        if self.old_data and self.old_data.technical_requirements is not None:
+            if self.old_data.technical_requirements.get(property_name) != value:
+                self.old_data.technical_requirements[property_name] = value
+                print(f"Обновлено техническое требование: {property_name} = {value}")
+
+    def _on_technical_requirement_name_change(self, old_name, new_name):
+        """
+        Обработчик изменения названия технического требования.
+        
+        Args:
+            old_name: Старое название требования
+            new_name: Новое название требования
+        """
+        if self.old_data and self.old_data.technical_requirements is not None:
+            if old_name in self.old_data.technical_requirements:
+                # Создаем новый словарь с сохранением порядка
+                new_requirements = {}
+                for key, value in self.old_data.technical_requirements.items():
+                    if key == old_name:
+                        new_requirements[new_name] = value
+                    else:
+                        new_requirements[key] = value
+                self.old_data.technical_requirements = new_requirements
+                print(f"Переименовано техническое требование: {old_name} -> {new_name}")
+
     def on_search_machine(self, instance):
         """Обрабатывает событие нажатия на кнопку поиска."""
         # Получаем текст из поля ввода
@@ -68,8 +103,6 @@ class DatabaseEditorWindow(Screen):
         self.old_data = get_info_by_name(self.model)
         self.new_data = copy.deepcopy(self.old_data)
         self.set_widget_data(self.old_data)
-
-
 
     def on_search_input_changed(self, instance, value: str):
         """Обрабатывает событие изменения текста в поле ввода."""
@@ -91,8 +124,8 @@ class DatabaseEditorWindow(Screen):
                     searchbar.input.x, searchbar.input.y
                 )[0]
                 dropdown.y = (
-                    searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1]
-                    - dropdown.height
+                        searchbar.input.to_window(searchbar.input.x, searchbar.input.y)[1]
+                        - dropdown.height
                 )
             else:
                 dropdown.opacity = 0
@@ -121,6 +154,7 @@ class DatabaseEditorWindow(Screen):
         self.content_widget.left_col.length_input.set_value("")
         self.content_widget.left_col.width_input.set_value("")
         self.content_widget.left_col.height_input.set_value("")
+        self.content_widget.left_col.overall_diameter_input.set_value("")
 
     def set_widget_data(self, data: MachineInfo):
         """Устанавливает данные в виджеты."""
@@ -146,35 +180,39 @@ class DatabaseEditorWindow(Screen):
             self.content_widget.left_col.length_input.set_value(str(data.dimensions.length))
             self.content_widget.left_col.width_input.set_value(str(data.dimensions.width))
             self.content_widget.left_col.height_input.set_value(str(data.dimensions.height))
+            self.content_widget.left_col.overall_diameter_input.set_value(str(data.dimensions.overall_diameter))
+            self.content_widget.right_col.update_properties(data.technical_requirements)
             print(f"Данные станка: {data}")
+
 
     def get_data_from_widgets(self):
         """Получает данные из виджетов."""
         machine_info = MachineInfo(
-            name = self.content_widget.left_col.search_bar.input.text,
-            group = self.content_widget.left_col.group_spinner.get_value().split(" ")[0],
-            type = self.content_widget.left_col.type_spinner.get_value().split(" ")[0],
-            power = self.content_widget.left_col.power_input.get_value(),
-            efficiency = self.content_widget.left_col.efficiency_input.get_value(),
-            accuracy = get_accuracy_by_description(self.content_widget.left_col.accuracy_spinner.get_value()),
-            automation = Automation(self.content_widget.left_col.automation_spinner.get_value()),
-            specialization = Specialization(self.content_widget.left_col.specialization_spinner.get_value()),
-            weight = self.content_widget.left_col.mass_input.get_value(),
-            weight_class = WeightClass(self.content_widget.left_col.weight_class_spinner.get_value()),
-            dimensions = Dimensions(
+            name=self.content_widget.left_col.search_bar.input.text,
+            group=self.content_widget.left_col.group_spinner.get_value().split(" ")[0],
+            type=self.content_widget.left_col.type_spinner.get_value().split(" ")[0],
+            power=self.content_widget.left_col.power_input.get_value(),
+            efficiency=self.content_widget.left_col.efficiency_input.get_value(),
+            accuracy=get_accuracy_by_description(self.content_widget.left_col.accuracy_spinner.get_value()),
+            automation=Automation(self.content_widget.left_col.automation_spinner.get_value()),
+            specialization=Specialization(self.content_widget.left_col.specialization_spinner.get_value()),
+            weight=self.content_widget.left_col.mass_input.get_value(),
+            weight_class=WeightClass(self.content_widget.left_col.weight_class_spinner.get_value()),
+            dimensions=Dimensions(
                 length=self.content_widget.left_col.length_input.get_value(),
                 width=self.content_widget.left_col.width_input.get_value(),
-                height=self.content_widget.left_col.height_input.get_value()
+                height=self.content_widget.left_col.height_input.get_value(),
+                overall_diameter=self.content_widget.left_col.overall_diameter_input.get_value()
             ),
-            location = Location(
+            location=Location(
                 city=self.content_widget.left_col.production_city_input.get_value(),
                 manufacturer=self.content_widget.left_col.organization_input.get_value()
             ),
-            machine_type = self.content_widget.left_col.machine_type_input.get_value()
+            machine_type=self.content_widget.left_col.machine_type_input.get_value()
         )
 
         return machine_info
-    
+
     def save_data(self, instance):
         """Сохраняет данные в базу данных."""
         data = self.get_data_from_widgets()
@@ -182,12 +220,7 @@ class DatabaseEditorWindow(Screen):
         print(f"Данные старого станка: {self.old_data}")
 
 
-
-
-
-
 if __name__ == "__main__":
-
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 
@@ -198,8 +231,8 @@ if __name__ == "__main__":
             window = DatabaseEditorWindow(debug_mode=True)
             return window
 
-    TestApp().run()
 
+    TestApp().run()
 
 # # Добавляем шаблон поиска
 #         self.search_bar = SearchBar(

@@ -10,6 +10,8 @@ from kivy.uix.boxlayout import BoxLayout
 from machine_tools_gui_kivi.app.components.database_editor.left_column import \
     LeftColumn
 from machine_tools_gui_kivi.app.components.searchbar import SearchBar
+from machine_tools_gui_kivi.app.components.database_editor.right_column import \
+    RightColumn
 
 
 class TemplateDatabaseEditor(BoxLayout):
@@ -17,12 +19,14 @@ class TemplateDatabaseEditor(BoxLayout):
     Шаблон-контейнер для окна редактирования базы данных с двумя колонками.
     """
 
-    def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
+    def __init__(self, screen_manager=None, debug_mode=False, on_technical_requirements_change=None, on_technical_requirement_name_change=None, **kwargs):
         super().__init__(
             orientation="horizontal", spacing=10, padding=[5, 5, 5, 5], **kwargs
         )
         self.screen_manager = screen_manager
         self.debug_mode = debug_mode
+        self.on_technical_requirements_change = on_technical_requirements_change
+        self.on_technical_requirement_name_change = on_technical_requirement_name_change
 
         # Создаем шаблон поиска
         self.search_bar = SearchBar(
@@ -46,7 +50,11 @@ class TemplateDatabaseEditor(BoxLayout):
 
         # Создаем колонки
         self.left_col = LeftColumn(debug_mode=self.debug_mode)
-        self.right_col = self._fill_right_column()
+        self.right_col = RightColumn(
+            debug_mode=self.debug_mode,
+            on_property_change=self._on_property_change,
+            on_property_name_change=self._on_property_name_change
+        )
 
         # Добавляем колонки в основной контейнер
         content.add_widget(self.left_col)
@@ -88,3 +96,32 @@ class TemplateDatabaseEditor(BoxLayout):
             with instance.canvas.before:
                 Color(0, 0, 0, 0.3)  # Черный с прозрачностью
                 Rectangle(pos=instance.pos, size=instance.size)
+
+    def _on_property_change(self, property_name, value):
+        """
+        Обработчик изменения значения свойства в правой колонке.
+        
+        Args:
+            property_name: Название свойства
+            value: Новое значение
+        """
+        if self.on_technical_requirements_change:
+            self.on_technical_requirements_change(property_name, value)
+        # Здесь можно обновить соответствующие поля в левой колонке
+        # Например:
+        if property_name == "Мощность":
+            self.left_col.power_input.input_field.text = value
+        elif property_name == "КПД":
+            self.left_col.efficiency_input.input_field.text = value
+        # Добавьте обработку других свойств по необходимости
+
+    def _on_property_name_change(self, old_name, new_name):
+        """
+        Обработчик изменения названия свойства в правой колонке.
+        
+        Args:
+            old_name: Старое название свойства
+            new_name: Новое название свойства
+        """
+        if self.on_technical_requirement_name_change:
+            self.on_technical_requirement_name_change(old_name, new_name)

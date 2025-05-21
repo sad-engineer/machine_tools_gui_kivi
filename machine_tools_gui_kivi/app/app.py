@@ -30,7 +30,7 @@ class WorkshopDesignApp(MDApp):
         theme_cls: Класс для управления темой приложения
     """
 
-    def __init__(self, theme: str = "Light", **kwargs):
+    def __init__(self, theme: str = "Dark", **kwargs):
         """
         Инициализирует приложение.
 

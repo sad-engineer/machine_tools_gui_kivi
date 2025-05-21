@@ -46,7 +46,20 @@ class SearchBar(BoxLayout):
             size_hint=(input_ratio, 1),
         )
 
-        self.button = Button(text=button_text, size_hint=(1 - input_ratio, 1))
+        # Кнопка
+        self.button = Button(
+            text=button_text,
+            size_hint=(1 - input_ratio, 1),
+            text_size=(None, None),
+            halign='center',
+            valign='middle',
+            font_size='12sp'  # Уменьшаем размер шрифта
+        )
+        self.button.bind(
+            size=lambda *x: setattr(
+                self.button, "text_size", (self.button.width, self.button.height)
+            )
+        )
 
         search_box.add_widget(self.input)
         search_box.add_widget(self.button)
