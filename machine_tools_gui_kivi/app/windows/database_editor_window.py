@@ -12,10 +12,15 @@ from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
 from machine_tools import Automation, Dimensions, Location, MachineInfo, Specialization, WeightClass
 from machine_tools import info_by_name as get_info_by_name
+from machine_tools import update as machine_tool_update
 
 from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
 from machine_tools_gui_kivi.app.components.template_window import TemplateWindow
-from machine_tools_gui_kivi.src.descriptions import ACCURACY_DESCRIPTIONS, get_accuracy_by_description
+from machine_tools_gui_kivi.src.descriptions import (
+    ACCURACY_DESCRIPTIONS,
+    get_accuracy_by_description,
+    get_type_fields_descriptions,
+)
 from machine_tools_gui_kivi.src.machine_finder import filter_names
 
 
@@ -26,8 +31,8 @@ class DatabaseEditorWindow(Screen):
         super().__init__(**kwargs)
         self.name = "input_window"
         self.model: Optional[str] = None
-        self.old_data: Optional[MachineInfo] = None  # Старые данные станка
-        self.new_data: Optional[MachineInfo] = None  # Новые данные станка
+        self.data_from_database: Optional[MachineInfo] = None  # Старые данные станка (данные из базы данных)
+        self.corrected_data: Optional[MachineInfo] = None  # Новые данные станка (данные для изменений)
 
         # Создаем шаблонное окно
         self.template_window = TemplateWindow(screen_manager=screen_manager, debug_mode=debug_mode)
@@ -47,9 +52,14 @@ class DatabaseEditorWindow(Screen):
         self.content_widget.left_col.search_bar.input.bind(text=self.on_search_input_changed)
         self.content_widget.left_col.search_bar_dropdown.on_select = self.on_dropdown_select
 
-        # Переопределяем имя и функцию button1
+        # Переопределяем имя и функцию кнопок
         self.template_window.button1.text = "Сохранить"
-        self.template_window.button1.bind(on_release=self.save_data)
+        self.template_window.button1.bind(on_release=self.on_release_save_button)
+
+        self.template_window.button2.text = "Отмена"
+        self.template_window.button2.bind(on_release=self.cancel)
+
+        self.clear_widgets()
 
     def _on_technical_requirements_change(self, property_name, value):
         """
@@ -59,9 +69,9 @@ class DatabaseEditorWindow(Screen):
             property_name: Название свойства
             value: Новое значение
         """
-        if self.old_data and self.old_data.technical_requirements is not None:
-            if self.old_data.technical_requirements.get(property_name) != value:
-                self.old_data.technical_requirements[property_name] = value
+        if self.corrected_data and self.corrected_data.technical_requirements is not None:
+            if self.corrected_data.technical_requirements.get(property_name) != value:
+                self.corrected_data.technical_requirements[property_name] = value
                 print(f"Обновлено техническое требование: {property_name} = {value}")
 
     def _on_technical_requirement_name_change(self, old_name, new_name):
@@ -72,26 +82,40 @@ class DatabaseEditorWindow(Screen):
             old_name: Старое название требования
             new_name: Новое название требования
         """
-        if self.old_data and self.old_data.technical_requirements is not None:
-            if old_name in self.old_data.technical_requirements:
+        if self.corrected_data and self.corrected_data.technical_requirements is not None:
+            if old_name in self.corrected_data.technical_requirements:
                 # Создаем новый словарь с сохранением порядка
                 new_requirements = {}
-                for key, value in self.old_data.technical_requirements.items():
+                for key, value in self.corrected_data.technical_requirements.items():
                     if key == old_name:
                         new_requirements[new_name] = value
                     else:
                         new_requirements[key] = value
-                self.old_data.technical_requirements = new_requirements
+                self.corrected_data.technical_requirements = new_requirements
                 print(f"Переименовано техническое требование: {old_name} -> {new_name}")
 
     def on_search_machine(self, instance):
         """Обрабатывает событие нажатия на кнопку поиска."""
         # Получаем текст из поля ввода
-        self.model = self.content_widget.left_col.search_bar.input.text
-        print(f"Выбран станок модели: {self.model}")
-        self.old_data = get_info_by_name(self.model)
-        self.new_data = copy.deepcopy(self.old_data)
-        self.set_widget_data(self.old_data)
+        text = self.content_widget.left_col.search_bar.input.text
+        if text:
+            # Удаляем все пробелы и преобразуем в верхний регистр
+            self.model = text.upper().replace(" ", "")
+            # Получаем данные из базы данных
+            self.get_info()
+        else:
+            print("Не введено название станка")
+
+    def get_info(self):
+        """Получаем данные из базы данных"""
+        info = get_info_by_name(self.model)
+        if info:
+            self.data_from_database = info
+            self.corrected_data = copy.deepcopy(info)
+            self.set_widget_data(info)
+            print(f"Выбран станок модели: {self.model}")
+        else:
+            print(f"Станок модели {self.model} не найден в базе данных.")
 
     def on_search_input_changed(self, instance, value: str):
         """Обрабатывает событие изменения текста в поле ввода."""
@@ -123,27 +147,33 @@ class DatabaseEditorWindow(Screen):
 
     def clear_widgets(self):
         """Очищает все виджеты."""
-        self.content_widget.left_col.group_spinner.set_value("")
-        self.content_widget.left_col.type_spinner.set_value("")
-        self.content_widget.left_col.machine_type_input.set_value("")
-        self.content_widget.left_col.power_input.set_value("")
-        self.content_widget.left_col.efficiency_input.set_value("")
-        self.content_widget.left_col.accuracy_spinner.set_value("")
-        self.content_widget.left_col.automation_spinner.set_value("")
-        self.content_widget.left_col.specialization_spinner.set_value("")
-        self.content_widget.left_col.mass_input.set_value("")
-        self.content_widget.left_col.weight_class_spinner.set_value("")
-        self.content_widget.left_col.production_city_input.set_value("")
-        self.content_widget.left_col.organization_input.set_value("")
-        self.content_widget.left_col.length_input.set_value("")
-        self.content_widget.left_col.width_input.set_value("")
-        self.content_widget.left_col.height_input.set_value("")
-        self.content_widget.left_col.overall_diameter_input.set_value("")
+        self.content_widget.left_col.group_spinner.clear_value()
+        self.content_widget.left_col.type_spinner.clear_value()
+        self.content_widget.left_col.machine_type_input.clear_value()
+        self.content_widget.left_col.power_input.clear_value()
+        self.content_widget.left_col.efficiency_input.clear_value()
+        self.content_widget.left_col.accuracy_spinner.clear_value()
+        self.content_widget.left_col.automation_spinner.clear_value()
+        self.content_widget.left_col.specialization_spinner.clear_value()
+        self.content_widget.left_col.mass_input.clear_value()
+        self.content_widget.left_col.weight_class_spinner.clear_value()
+        self.content_widget.left_col.production_city_input.clear_value()
+        self.content_widget.left_col.organization_input.clear_value()
+        self.content_widget.left_col.length_input.clear_value()
+        self.content_widget.left_col.width_input.clear_value()
+        self.content_widget.left_col.height_input.clear_value()
+        self.content_widget.left_col.overall_diameter_input.clear_value()
 
     def set_widget_data(self, data: MachineInfo):
         """Устанавливает данные в виджеты."""
         if isinstance(data, MachineInfo):
-            self.content_widget.left_col.group_spinner.set_value(str(int(data.group)))
+            #  получаем список типов станков для выпадающего списка по группе выбранного станка
+            str_group = str(int(data.group))
+            type_fields = get_type_fields_descriptions(str_group)
+            #  устанавливаем список типов станков для выпадающего списка типа станка
+            self.content_widget.left_col.type_spinner.spinner.values = type_fields
+            #  устанавливаем значения для полей по данным из базы данных
+            self.content_widget.left_col.group_spinner.set_value(str_group)
             self.content_widget.left_col.type_spinner.set_value(str(int(data.type)))
             self.content_widget.left_col.machine_type_input.set_value(str(data.machine_type))
             self.content_widget.left_col.power_input.set_value(str(data.power))
@@ -160,41 +190,74 @@ class DatabaseEditorWindow(Screen):
             self.content_widget.left_col.height_input.set_value(str(data.dimensions.height))
             self.content_widget.left_col.overall_diameter_input.set_value(str(data.dimensions.overall_diameter))
             self.content_widget.right_col.update_properties(data.technical_requirements)
-            print(f"Данные станка: {data}")
 
     def get_data_from_widgets(self):
-        """Получает данные из виджетов."""
-        machine_info = MachineInfo(
-            name=self.content_widget.left_col.search_bar.input.text,
-            group=self.content_widget.left_col.group_spinner.get_value().split(" ")[0],
-            type=self.content_widget.left_col.type_spinner.get_value().split(" ")[0],
-            power=self.content_widget.left_col.power_input.get_value(),
-            efficiency=self.content_widget.left_col.efficiency_input.get_value(),
-            accuracy=get_accuracy_by_description(self.content_widget.left_col.accuracy_spinner.get_value()),
-            automation=Automation(self.content_widget.left_col.automation_spinner.get_value()),
-            specialization=Specialization(self.content_widget.left_col.specialization_spinner.get_value()),
-            weight=self.content_widget.left_col.mass_input.get_value(),
-            weight_class=WeightClass(self.content_widget.left_col.weight_class_spinner.get_value()),
-            dimensions=Dimensions(
-                length=self.content_widget.left_col.length_input.get_value(),
-                width=self.content_widget.left_col.width_input.get_value(),
-                height=self.content_widget.left_col.height_input.get_value(),
-                overall_diameter=self.content_widget.left_col.overall_diameter_input.get_value(),
-            ),
-            location=Location(
-                city=self.content_widget.left_col.production_city_input.get_value(),
-                manufacturer=self.content_widget.left_col.organization_input.get_value(),
-            ),
-            machine_type=self.content_widget.left_col.machine_type_input.get_value(),
+        """
+        Получает данные из виджетов и сохраняет их в объект MachineInfo.
+        ВАЖНО! Объект MachineInfo - объект pydantic.BaseModel, поэтому данные обновляются, но не валидируются
+        """
+        self.corrected_data.name = self.content_widget.left_col.search_bar.input.text
+        self.corrected_data.group = int(self.content_widget.left_col.group_spinner.get_value().split(" ")[0])
+        self.corrected_data.type = int(self.content_widget.left_col.type_spinner.get_value().split(" ")[0])
+        self.corrected_data.power = float(self.content_widget.left_col.power_input.get_value())
+        self.corrected_data.efficiency = float(self.content_widget.left_col.efficiency_input.get_value())
+        self.corrected_data.accuracy = get_accuracy_by_description(
+            self.content_widget.left_col.accuracy_spinner.get_value()
         )
+        self.corrected_data.automation = Automation(self.content_widget.left_col.automation_spinner.get_value())
+        self.corrected_data.specialization = Specialization(
+            self.content_widget.left_col.specialization_spinner.get_value(),
+        )
+        self.corrected_data.weight = float(self.content_widget.left_col.mass_input.get_value())
+        self.corrected_data.weight_class = WeightClass(self.content_widget.left_col.weight_class_spinner.get_value())
+        self.corrected_data.dimensions = Dimensions(
+            length=int(float(self.content_widget.left_col.length_input.get_value())),
+            width=int(float(self.content_widget.left_col.width_input.get_value())),
+            height=int(float(self.content_widget.left_col.height_input.get_value())),
+            overall_diameter=self.content_widget.left_col.overall_diameter_input.get_value(),
+        )
+        self.corrected_data.location = Location(
+            city=self.content_widget.left_col.production_city_input.get_value(),
+            manufacturer=self.content_widget.left_col.organization_input.get_value(),
+        )
+        self.corrected_data.machine_type = self.content_widget.left_col.machine_type_input.get_value()
 
-        return machine_info
+    def on_release_save_button(self, instance):
+        """Обрабатывает событие нажатия на кнопку сохранения."""
+        if not self.corrected_data:
+            print("Данные не найдены")
+            return
+        if not isinstance(self.corrected_data, MachineInfo):
+            print("Данные не являются объектом MachineInfo")
+            return
+        self.get_data_from_widgets()
+        if self.corrected_data != self.data_from_database:
+            self.save_data(self.corrected_data)
+        else:
+            print("Измененных данных не найдено.")
 
-    def save_data(self, instance):
+    def save_data(self, data: MachineInfo):
         """Сохраняет данные в базу данных."""
-        data = self.get_data_from_widgets()
-        print(f"Данные из виджетов: {data}")
-        print(f"Данные старого станка: {self.old_data}")
+        print(f"Данные из базы данных: {self.data_from_database}")
+        print(f"Скорректированные данные: {self.corrected_data}")
+        print(f"Обновляем данные в БД...")
+        result = machine_tool_update(data)
+        if result:
+            print("Данные успешно обновлены в базе данных.")
+        else:
+            print("Ошибка при обновлении данных в базе данных.")
+        self.get_info()
+
+    @staticmethod
+    def cancel(instance):
+        """
+        Отменяет ввод данных и завершает работу приложения.
+
+        Args:
+            instance: Экземпляр кнопки
+        """
+        # Завершаем работу приложения
+        MDApp.get_running_app().stop()
 
 
 if __name__ == "__main__":
@@ -210,210 +273,3 @@ if __name__ == "__main__":
             return window
 
     TestApp().run()
-
-# # Добавляем шаблон поиска
-#         self.search_bar = SearchBar(
-#             input_hint="Введите название станка",
-#             button_text="Поиск",
-#             input_ratio=0.8,
-#             height=35,
-#             debug_mode=self.debug_mode,
-#         )
-#         self.search_bar.size_hint = (1, None)
-#         self.search_bar.pos_hint = {'top': 1}
-#
-#         #Лейбл с надписью "Группа станка"
-#         group_label = Label(
-#             text="Группа станка",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода группы станка
-#         self.group_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Тип станка"
-#         type_label = Label(
-#             text="Тип станка",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода типа станка
-#         self.type_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         self.machine_type_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Мощность"
-#         power_label = Label(
-#             text="Мощность",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода мощности
-#         self.power_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "КПД"
-#         efficiency_label = Label(
-#             text="КПД",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода КПД
-#         self.efficiency_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Точность"
-#         accuracy_label = Label(
-#             text="Точность",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода точности
-#         self.accuracy_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Автоматизация"
-#         automation_label = Label(
-#             text="Автоматизация",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода автоматизации
-#         self.automation_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Специализация    "
-#         specialization_label = Label(
-#             text="Специализация",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода специализации
-#         self.specialization_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Масса"
-#         mass_label = Label(
-#             text="Масса",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода массы
-#         self.mass_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Класс станка по массе    "
-#         mass_class_label = Label(
-#             text="Класс станка по массе",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода класса станка по массе
-#         self.mass_class_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Город производства"
-#         production_city_label = Label(
-#             text="Город производства",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода города производства
-#         self.production_city_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         #Лейбл с надписью "Организация-производитель"
-#         organization_label = Label(
-#             text="Организация-производитель",
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#         #Поле для ввода организации-производителя
-#         self.organization_input = TextInput(
-#             size_hint=(1, None),
-#             height=30,
-#             halign="left"
-#         )
-#
-#         # Добавляем все виджеты в left_col
-#         left_col.add_widget(self.search_bar)
-#         left_col.add_widget(group_label)
-#         left_col.add_widget(self.group_input)
-#         left_col.add_widget(type_label)
-#         left_col.add_widget(self.type_input)
-#         left_col.add_widget(self.machine_type_input)
-#         left_col.add_widget(power_label)
-#         left_col.add_widget(self.power_input)
-#         left_col.add_widget(efficiency_label)
-#         left_col.add_widget(self.efficiency_input)
-#         left_col.add_widget(accuracy_label)
-#         left_col.add_widget(self.accuracy_input)
-#         left_col.add_widget(automation_label)
-#         left_col.add_widget(self.automation_input)
-#         left_col.add_widget(specialization_label)
-#         left_col.add_widget(self.specialization_input)
-#         left_col.add_widget(mass_label)
-#         left_col.add_widget(self.mass_input)
-#         left_col.add_widget(mass_class_label)
-#         left_col.add_widget(self.mass_class_input)
-#         left_col.add_widget(production_city_label)
-#         left_col.add_widget(self.production_city_input)
-#         left_col.add_widget(organization_label)
-#         left_col.add_widget(self.organization_input)
-
-# Добавляем выпадающий список
-#         self.search_bar_dropdown = DropdownList(
-#             size_hint=(0.4, None),
-#             height=200,
-#             item_height=30,
-#             item_spacing=2,
-#             bar_width=10,
-#             item_cols=2,
-#             opacity=0
-#         )

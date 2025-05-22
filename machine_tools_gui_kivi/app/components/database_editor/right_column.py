@@ -7,6 +7,7 @@
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 
@@ -84,6 +85,16 @@ class RightColumn(BoxLayout):
 
     def _init_content(self):
         """Инициализирует контент колонки."""
+        # Создаем лейбл для названия таблицы
+        self.table_name_label = Label(
+            text="Технические характеристики станка",
+            size_hint=(1, None),
+            height=30,
+            halign="left",
+            valign="middle",
+        )
+        self.add_widget(self.table_name_label)
+
         # Создаем ScrollView
         self.scroll_view = ScrollView(
             size_hint=(1, 1),

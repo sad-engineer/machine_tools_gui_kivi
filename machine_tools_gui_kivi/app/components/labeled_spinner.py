@@ -92,6 +92,9 @@ class LabeledSpinner(BoxLayout):
 
     def set_value(self, substring):
         """Устанавливает значение спинера по тексту"""
+        if substring == "" or substring is None:
+            self.spinner.text = ""
+            return True
         for description in self.spinner.values:
             if substring in description:
                 self.spinner.text = description
@@ -101,6 +104,10 @@ class LabeledSpinner(BoxLayout):
     def get_value(self):
         """Возвращает значение спинера."""
         return self.spinner.text
+
+    def clear_value(self):
+        """Очищает значение спинера."""
+        self.spinner.text = ""
 
 
 if __name__ == "__main__":

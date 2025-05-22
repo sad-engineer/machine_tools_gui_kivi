@@ -75,6 +75,10 @@ class LabeledInput(BoxLayout):
         """Возвращает значение поля ввода."""
         return self.input_field.text
 
+    def clear_value(self):
+        """Очищает значение поля ввода."""
+        self.input_field.text = ""
+
 
 if __name__ == "__main__":
     from kivy.app import App
