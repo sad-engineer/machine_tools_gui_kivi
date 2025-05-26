@@ -9,7 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from machine_tools import Automation, Specialization, WeightClass
+from machine_tools import Automation, Specialization, WeightClass, SoftwareControl
 
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 from machine_tools_gui_kivi.app.components.labeled_input import LabeledInput
@@ -17,8 +17,8 @@ from machine_tools_gui_kivi.app.components.labeled_spinner import LabeledSpinner
 from machine_tools_gui_kivi.app.components.searchbar import SearchBar
 from machine_tools_gui_kivi.src.descriptions import get_accuracy_fields_descriptions as get_accuracy_fields
 from machine_tools_gui_kivi.src.descriptions import get_group_fields_descriptions as get_group_fields
+from machine_tools_gui_kivi.src.descriptions import get_specialization_fields_descriptions as get_specialization_fields
 from machine_tools_gui_kivi.src.descriptions import get_type_fields_descriptions as get_type_fields
-
 
 def get_custom_spinner(label_text: str, values: list, debug_mode: bool = False) -> LabeledSpinner:
     """Настраивает спиннер."""
@@ -107,7 +107,17 @@ class LeftColumn(BoxLayout):
         self.machine_type_input = get_custom_input("Тип станка (доп.):", debug_mode=self.debug_mode)
         container.add_widget(self.machine_type_input)
 
-        # Мощность, КПД и Автоматизация в одну строку
+        # Автоматизация, Признак ЧПУ  в одну строку
+        horizontal_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
+        # Автоматизация
+        self.automation_spinner = get_custom_spinner("Автоматизация:", Automation.get_values(), self.debug_mode)
+        horizontal_container.add_widget(self.automation_spinner)
+        # Признак ЧПУ
+        self.software_control_spinner = get_custom_spinner("Наличие ЧПУ:", SoftwareControl.get_values(), self.debug_mode)
+        horizontal_container.add_widget(self.software_control_spinner)
+        container.add_widget(horizontal_container)
+
+        # Мощность, КПД  в одну строку
         horizontal_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
         # Мощность
         self.power_input = get_custom_input("Мощность:", "кВт", debug_mode=self.debug_mode)
@@ -115,10 +125,8 @@ class LeftColumn(BoxLayout):
         # КПД
         self.efficiency_input = get_custom_input("КПД:", "%", debug_mode=self.debug_mode)
         horizontal_container.add_widget(self.efficiency_input)
-        # Автоматизация
-        self.automation_spinner = get_custom_spinner("Автоматизация:", Automation.get_values(), self.debug_mode)
-        horizontal_container.add_widget(self.automation_spinner)
         container.add_widget(horizontal_container)
+        
 
         # Точность станка
         self.accuracy_spinner = get_custom_spinner("Точность станка:", get_accuracy_fields(), self.debug_mode)
@@ -129,14 +137,14 @@ class LeftColumn(BoxLayout):
         container.add_widget(self.specialization_spinner)
 
         # Масса и Класс станка по массе в одну строку
-        horizontal_container_1 = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
+        horizontal_container_2 = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
         self.mass_input = get_custom_input("Масса:", "кг", debug_mode=self.debug_mode)
-        horizontal_container_1.add_widget(self.mass_input)
+        horizontal_container_2.add_widget(self.mass_input)
         self.weight_class_spinner = get_custom_spinner(
             "Класс станка по массе:", WeightClass.get_values(), self.debug_mode
         )
-        horizontal_container_1.add_widget(self.weight_class_spinner)
-        container.add_widget(horizontal_container_1)
+        horizontal_container_2.add_widget(self.weight_class_spinner)
+        container.add_widget(horizontal_container_2)
 
         # Размеры
         label_1 = Label(

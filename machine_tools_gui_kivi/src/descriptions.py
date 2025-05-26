@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 from typing import Union
 
-from machine_tools import ACCURACY_DESCRIPTIONS, GROUP_DESCRIPTIONS, TYPE_DESCRIPTIONS, Accuracy
+from machine_tools import ACCURACY_DESCRIPTIONS, GROUP_DESCRIPTIONS, TYPE_DESCRIPTIONS, Accuracy, Specialization
 
 
 def get_group_fields_descriptions() -> list[str]:
@@ -91,3 +91,10 @@ def get_accuracy_by_description(description: str) -> Accuracy:
     accuracy = list(ACCURACY_DESCRIPTIONS.keys())[description_index]
     accuracy_cls = Accuracy(accuracy)
     return accuracy_cls
+
+
+def get_specialization_fields_descriptions() -> list[str]:
+    """
+    Возвращает список описаний специализаций станков.
+    """
+    return Specialization.get_values()

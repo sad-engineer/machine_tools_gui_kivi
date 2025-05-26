@@ -10,8 +10,8 @@ from typing import Optional
 from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
-from machine_tools import Automation, Dimensions, Location, MachineInfo, Specialization, WeightClass
-from machine_tools import info_by_name as get_info_by_name
+from machine_tools import Automation, Dimensions, Location, MachineInfo, Specialization, WeightClass, SoftwareControl
+from machine_tools import info_by_name
 from machine_tools import update as machine_tool_update
 
 from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor
@@ -108,7 +108,7 @@ class DatabaseEditorWindow(Screen):
 
     def get_info(self):
         """Получаем данные из базы данных"""
-        info = get_info_by_name(self.model)
+        info = info_by_name(self.model)
         if info:
             self.data_from_database = info
             self.corrected_data = copy.deepcopy(info)
@@ -163,6 +163,7 @@ class DatabaseEditorWindow(Screen):
         self.content_widget.left_col.width_input.clear_value()
         self.content_widget.left_col.height_input.clear_value()
         self.content_widget.left_col.overall_diameter_input.clear_value()
+        self.content_widget.left_col.software_control_spinner.clear_value()
 
     def set_widget_data(self, data: MachineInfo):
         """Устанавливает данные в виджеты."""
@@ -190,6 +191,7 @@ class DatabaseEditorWindow(Screen):
             self.content_widget.left_col.height_input.set_value(str(data.dimensions.height))
             self.content_widget.left_col.overall_diameter_input.set_value(str(data.dimensions.overall_diameter))
             self.content_widget.right_col.update_properties(data.technical_requirements)
+            self.content_widget.left_col.software_control_spinner.set_value(data.software_control.value)
 
     def get_data_from_widgets(self):
         """
@@ -221,6 +223,9 @@ class DatabaseEditorWindow(Screen):
             manufacturer=self.content_widget.left_col.organization_input.get_value(),
         )
         self.corrected_data.machine_type = self.content_widget.left_col.machine_type_input.get_value()
+        self.corrected_data.software_control = SoftwareControl(
+            self.content_widget.left_col.software_control_spinner.get_value(),
+        )
 
     def on_release_save_button(self, instance):
         """Обрабатывает событие нажатия на кнопку сохранения."""
