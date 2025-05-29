@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 import timeit
+
 import machine_tools
+
 print(machine_tools.__file__)
 
 from machine_tools import Finder, ListMachineInfoFormatter
@@ -32,7 +34,6 @@ def info_by_name(name: str) -> dict:
         return machine[0]
 
 
-
 if __name__ == "__main__":
     # print(filter_names(""))
     #
@@ -55,7 +56,6 @@ if __name__ == "__main__":
     #     except Exception as e:
     #         print(name)
     #         print(e)
-    
+
     info = info_by_name("16К20Ф3")
     print(f"{info.name} {info.software_control}")
-

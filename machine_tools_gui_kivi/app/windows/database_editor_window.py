@@ -10,8 +10,16 @@ from typing import Optional
 from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
-from machine_tools import Automation, Dimensions, Location, MachineInfo, Specialization, WeightClass, SoftwareControl
-from machine_tools import info_by_name
+from machine_tools import (
+    Automation,
+    Dimensions,
+    Location,
+    MachineInfo,
+    SoftwareControl,
+    Specialization,
+    WeightClass,
+    info_by_name,
+)
 from machine_tools import update as machine_tool_update
 
 from machine_tools_gui_kivi.app.components.database_editor import TemplateDatabaseEditor

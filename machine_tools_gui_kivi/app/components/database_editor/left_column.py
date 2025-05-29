@@ -9,7 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from machine_tools import Automation, Specialization, WeightClass, SoftwareControl
+from machine_tools import Automation, SoftwareControl, Specialization, WeightClass
 
 from machine_tools_gui_kivi.app.components.dropdown_list import DropdownList
 from machine_tools_gui_kivi.app.components.labeled_input import LabeledInput
@@ -19,6 +19,7 @@ from machine_tools_gui_kivi.src.descriptions import get_accuracy_fields_descript
 from machine_tools_gui_kivi.src.descriptions import get_group_fields_descriptions as get_group_fields
 from machine_tools_gui_kivi.src.descriptions import get_specialization_fields_descriptions as get_specialization_fields
 from machine_tools_gui_kivi.src.descriptions import get_type_fields_descriptions as get_type_fields
+
 
 def get_custom_spinner(label_text: str, values: list, debug_mode: bool = False) -> LabeledSpinner:
     """Настраивает спиннер."""
@@ -113,7 +114,9 @@ class LeftColumn(BoxLayout):
         self.automation_spinner = get_custom_spinner("Автоматизация:", Automation.get_values(), self.debug_mode)
         horizontal_container.add_widget(self.automation_spinner)
         # Признак ЧПУ
-        self.software_control_spinner = get_custom_spinner("Наличие ЧПУ:", SoftwareControl.get_values(), self.debug_mode)
+        self.software_control_spinner = get_custom_spinner(
+            "Наличие ЧПУ:", SoftwareControl.get_values(), self.debug_mode
+        )
         horizontal_container.add_widget(self.software_control_spinner)
         container.add_widget(horizontal_container)
 
@@ -126,7 +129,6 @@ class LeftColumn(BoxLayout):
         self.efficiency_input = get_custom_input("КПД:", "%", debug_mode=self.debug_mode)
         horizontal_container.add_widget(self.efficiency_input)
         container.add_widget(horizontal_container)
-        
 
         # Точность станка
         self.accuracy_spinner = get_custom_spinner("Точность станка:", get_accuracy_fields(), self.debug_mode)
