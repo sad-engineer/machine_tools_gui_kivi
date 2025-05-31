@@ -64,13 +64,13 @@ class TemplateWindow(FloatLayout):
             padding=0,
             on_release=self.toggle_theme,
         )
-        self.settings_btn = MDIconButton(
-            icon="cog",
-            size_hint=(None, None),
-            size=(40, 40),
-            padding=0,
-            on_release=self.open_settings,
-        )
+        # self.settings_btn = MDIconButton(
+        #     icon="cog",
+        #     size_hint=(None, None),
+        #     size=(40, 40),
+        #     padding=0,
+        #     on_release=self.open_settings,
+        # )
         self.label = MDLabel(
             text="Заголовок окна",
             size_hint=(1, 1),
@@ -80,7 +80,7 @@ class TemplateWindow(FloatLayout):
         )
         self.header.add_widget(self.label)
         self.header.add_widget(self.theme_btn)
-        self.header.add_widget(self.settings_btn)
+        # self.header.add_widget(self.settings_btn)
         self.root_box.add_widget(self.header)
         self.header.bind(
             pos=self._update_template_header_debug,
