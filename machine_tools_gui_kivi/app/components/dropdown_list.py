@@ -27,7 +27,6 @@ class DropdownList(ScrollView):
         self.btn_item_height = item_height
         self.btn_item_spacing = item_spacing
 
-        # Создаем сетку для элементов списка
         self.grid = GridLayout(cols=item_cols, spacing=self.btn_item_spacing, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter("height"))
         self.add_widget(self.grid)
@@ -66,7 +65,6 @@ if __name__ == "__main__":
     class TestDropdownApp(App):
         def build(self):
             root = FloatLayout()
-            # Поле ввода — фиксируем по ширине и позиции
             self.input = TextInput(
                 size_hint=(0.5, None),
                 height=40,
@@ -75,7 +73,6 @@ if __name__ == "__main__":
 
             root.add_widget(self.input)
 
-            # Выпадающий список — изначально скрыт, позиционируем под полем ввода
             self.dropdown = DropdownList(
                 size_hint=(0.5, None),
                 height=200,
@@ -103,10 +100,8 @@ if __name__ == "__main__":
             ]
             filtered = [opt for opt in options if value.lower() in opt.lower()] if value else []
             self.dropdown.update_items(filtered)
-            # Показываем список только если есть варианты и поле в фокусе
             if filtered and self.input.focus:
                 self.dropdown.opacity = 1
-                # Позиционируем dropdown под input
                 self.dropdown.pos = (self.input.x, self.input.y - self.dropdown.height)
             else:
                 self.dropdown.opacity = 0

@@ -12,7 +12,6 @@ class LabeledInput(BoxLayout):
         super().__init__(orientation="vertical", size_hint=(1, None), height=height, spacing=spacing, **kwargs)
         self.debug_mode = debug_mode
 
-        # Лейбл
         label = Label(
             text=label_text,
             size_hint=(1, None),
@@ -23,10 +22,8 @@ class LabeledInput(BoxLayout):
         label.bind(size=lambda *x: setattr(label, "text_size", (label.width, label.height)))
         self.label = label
 
-        # Контейнер для поля ввода и единиц измерения
         input_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=30, spacing=5)
 
-        # Поле ввода
         input_field = TextInput(
             text=input_text,
             size_hint=(1, None),
@@ -36,7 +33,6 @@ class LabeledInput(BoxLayout):
         self.input_field = input_field
         input_container.add_widget(input_field)
 
-        # Если есть единицы измерения, добавляем их лейбл
         if units:
             units_label = Label(
                 text=units,
@@ -52,7 +48,6 @@ class LabeledInput(BoxLayout):
         self.add_widget(self.label)
         self.add_widget(input_container)
 
-        # DEBUG background
         self.bind(pos=self._update_debug_bg, size=self._update_debug_bg)
         self._update_debug_bg()
 

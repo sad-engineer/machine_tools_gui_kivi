@@ -31,7 +31,6 @@ class TemplateDatabaseEditor(BoxLayout):
         self.on_technical_requirements_change = on_technical_requirements_change
         self.on_technical_requirement_name_change = on_technical_requirement_name_change
 
-        # Создаем шаблон поиска
         self.search_bar = SearchBar(
             input_hint="Введите название станка",
             button_text="Поиск",
@@ -51,7 +50,6 @@ class TemplateDatabaseEditor(BoxLayout):
             spacing=5,
         )
 
-        # Создаем колонки
         self.left_col = LeftColumn(debug_mode=self.debug_mode)
         self.right_col = RightColumn(
             debug_mode=self.debug_mode,
@@ -59,12 +57,10 @@ class TemplateDatabaseEditor(BoxLayout):
             on_property_name_change=self._on_property_name_change,
         )
 
-        # Добавляем колонки в основной контейнер
         content.add_widget(self.left_col)
         content.add_widget(self.right_col)
         self.add_widget(content)
 
-        # Привязываем отладочные обновления
         content.bind(
             pos=self._update_template_content_debug,
             size=self._update_template_content_debug,

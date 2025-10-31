@@ -32,14 +32,12 @@ class TemplateWindow(FloatLayout):
 
     def _init_template_ui(self):
         """Инициализирует пользовательский интерфейс."""
-        # Создаем корневой контейнер
         self.root_box = BoxLayout(orientation="vertical")
         self.add_widget(self.root_box)
         self._create_template_header()
         self._create_template_content()
         self._create_template_buttons()
 
-        # Программно изменяем размер окна для пересчета позиций
         def trigger_resize(dt):
             current_width = Window.width
             current_height = Window.height
@@ -120,7 +118,6 @@ class TemplateWindow(FloatLayout):
             size=self._update_template_buttons_debug,
         )
 
-        # Центрирование кнопок и ограничение ширины при изменении размера контейнера
         self.buttons_box.bind(size=self._update_template_buttons_width)
 
     def _update_template_header_debug(self, instance, value):
@@ -175,7 +172,6 @@ class TemplateWindow(FloatLayout):
         Args:
             instance: Экземпляр кнопки
         """
-        # Завершаем работу приложения
         MDApp.get_running_app().stop()
 
     @staticmethod
@@ -206,14 +202,12 @@ if __name__ == "__main__":
             Window.minimum_height = 500
             window = TemplateWindow(debug_mode=True)
 
-            # Переопределяем имя и функцию button1
             window.button1.text = "ОК"
             window.button1.bind(on_release=lambda instance: print("Нажата кнопка 'OK'"))
 
             window.button2.text = "Cancel"
             window.button2.bind(on_release=lambda instance: print("Нажата кнопка 'Cancel'"))
 
-            # Пример добавления дополнительной кнопки
             extra_button = Button(
                 text="Доп. кнопка",
                 size_hint=(None, 1),

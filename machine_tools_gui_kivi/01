@@ -1,6 +1,6 @@
-cd C:\Users\Korenyk.A\Downloads\pgsql\bin
+cd C:\Users\Korenyk.A\Documents\Downloads\pgsql\bin
 cd "C:\Program Files\PostgreSQL\17"
-.\pg_ctl.exe start -D "C:\Users\Korenyk.A\Downloads\pgsql\data"
+.\pg_ctl.exe start -D "C:\Users\Korenyk.A\Documents\Downloads\pgsql\data"
 .\pg_ctl.exe start -D "C:\Program Files\PostgreSQL\17\data"
 netstat -ano | findstr 5432
 .\psql.exe -U machine_tools

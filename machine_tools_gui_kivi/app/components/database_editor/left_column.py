@@ -67,20 +67,16 @@ class LeftColumn(BoxLayout):
             bar_width=10,
         )
 
-        # Создаем контейнер для полей ввода
         fields_container = GridLayout(cols=1, spacing=5, size_hint_y=None, padding=[0, 0, 10, 0])
         fields_container.bind(minimum_height=fields_container.setter("height"))
 
-        # Создаем и добавляем все виджеты
         self._create_widgets(fields_container)
 
-        # Добавляем контейнер с полями в ScrollView
         scroll_view.add_widget(fields_container)
         self.add_widget(scroll_view)
 
     def _create_widgets(self, container):
         """Создает и добавляет все виджеты в контейнер."""
-        # Поле поиска
         self.search_bar = SearchBar(
             input_hint="Введите название станка",
             button_text="Загрузить\nиз БД",
@@ -92,11 +88,9 @@ class LeftColumn(BoxLayout):
         self.search_bar.pos_hint = {"top": 1}
         self.add_widget(self.search_bar)
 
-        # Группа станка
         self.group_spinner = get_custom_spinner("Группа станка:", get_group_fields(), self.debug_mode)
         container.add_widget(self.group_spinner)
 
-        # Тип станка
         self.type_spinner = get_custom_spinner(
             "Тип станка:",
             get_type_fields(self.group_spinner.spinner.text[:1]),
@@ -104,41 +98,31 @@ class LeftColumn(BoxLayout):
         )
         container.add_widget(self.type_spinner)
 
-        # Расшифровка типа станка
         self.machine_type_input = get_custom_input("Тип станка (доп.):", debug_mode=self.debug_mode)
         container.add_widget(self.machine_type_input)
 
-        # Автоматизация, Признак ЧПУ  в одну строку
         horizontal_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
-        # Автоматизация
         self.automation_spinner = get_custom_spinner("Автоматизация:", Automation.get_values(), self.debug_mode)
         horizontal_container.add_widget(self.automation_spinner)
-        # Признак ЧПУ
         self.software_control_spinner = get_custom_spinner(
             "Наличие ЧПУ:", SoftwareControl.get_values(), self.debug_mode
         )
         horizontal_container.add_widget(self.software_control_spinner)
         container.add_widget(horizontal_container)
 
-        # Мощность, КПД  в одну строку
         horizontal_container = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
-        # Мощность
         self.power_input = get_custom_input("Мощность:", "кВт", debug_mode=self.debug_mode)
         horizontal_container.add_widget(self.power_input)
-        # КПД
         self.efficiency_input = get_custom_input("КПД:", "%", debug_mode=self.debug_mode)
         horizontal_container.add_widget(self.efficiency_input)
         container.add_widget(horizontal_container)
 
-        # Точность станка
         self.accuracy_spinner = get_custom_spinner("Точность станка:", get_accuracy_fields(), self.debug_mode)
         container.add_widget(self.accuracy_spinner)
 
-        # Специализация
         self.specialization_spinner = get_custom_spinner("Специализация:", Specialization.get_values(), self.debug_mode)
         container.add_widget(self.specialization_spinner)
 
-        # Масса и Класс станка по массе в одну строку
         horizontal_container_2 = BoxLayout(orientation="horizontal", size_hint=(1, None), height=65, spacing=5)
         self.mass_input = get_custom_input("Масса:", "кг", debug_mode=self.debug_mode)
         horizontal_container_2.add_widget(self.mass_input)
@@ -148,7 +132,6 @@ class LeftColumn(BoxLayout):
         horizontal_container_2.add_widget(self.weight_class_spinner)
         container.add_widget(horizontal_container_2)
 
-        # Размеры
         label_1 = Label(
             text="Размеры:",
             size_hint=(1, None),
@@ -167,19 +150,15 @@ class LeftColumn(BoxLayout):
         horizontal_container_2.add_widget(self.height_input)
         container.add_widget(horizontal_container_2)
 
-        # Размеры рабочей зоны
         self.overall_diameter_input = get_custom_input("Размеры рабочей зоны:", "мм", debug_mode=self.debug_mode)
         container.add_widget(self.overall_diameter_input)
 
-        # Город производства
         self.production_city_input = get_custom_input("Город производства:", debug_mode=self.debug_mode)
         container.add_widget(self.production_city_input)
 
-        # Организация-производитель
         self.organization_input = get_custom_input("Организация-производитель:", debug_mode=self.debug_mode)
         container.add_widget(self.organization_input)
 
-        # Добавляем выпадающий список
         self.search_bar_dropdown = DropdownList(
             size_hint=(0.4, None),
             height=200,

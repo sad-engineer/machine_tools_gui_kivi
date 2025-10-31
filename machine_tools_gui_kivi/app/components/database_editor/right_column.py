@@ -22,7 +22,6 @@ class PropertyRow(BoxLayout):
         self.on_name_change = on_name_change
         self._old_name = property_name
 
-        # Название свойства
         self.name_input = TextInput(
             text=property_name,
             size_hint=(0.8, 1),
@@ -30,7 +29,6 @@ class PropertyRow(BoxLayout):
             padding=[2, 2, 2, 2],
         )
 
-        # Значение свойства
         self.value_input = TextInput(
             text="",
             size_hint=(0.2, 1),
@@ -38,7 +36,6 @@ class PropertyRow(BoxLayout):
             padding=[2, 2, 2, 2],
         )
 
-        # Привязываем обработчики изменения значений
         self.value_input.bind(text=self._on_value_change)
         self.name_input.bind(text=self._on_name_change)
 
@@ -85,7 +82,6 @@ class RightColumn(BoxLayout):
 
     def _init_content(self):
         """Инициализирует контент колонки."""
-        # Создаем лейбл для названия таблицы
         self.table_name_label = Label(
             text="Технические характеристики станка",
             size_hint=(1, None),
@@ -95,7 +91,6 @@ class RightColumn(BoxLayout):
         )
         self.add_widget(self.table_name_label)
 
-        # Создаем ScrollView
         self.scroll_view = ScrollView(
             size_hint=(1, 1),
             do_scroll_x=False,
@@ -104,11 +99,9 @@ class RightColumn(BoxLayout):
             bar_width=10,
         )
 
-        # Создаем контейнер для строк свойств
         self.properties_container = GridLayout(cols=1, spacing=2, size_hint_y=None, padding=[0, 0, 0, 0])
         self.properties_container.bind(minimum_height=self.properties_container.setter("height"))
 
-        # Добавляем контейнер в ScrollView
         self.scroll_view.add_widget(self.properties_container)
         self.add_widget(self.scroll_view)
 

@@ -107,9 +107,7 @@ class DatabaseEditorWindow(Screen):
         # Получаем текст из поля ввода
         text = self.content_widget.left_col.search_bar.input.text
         if text:
-            # Удаляем все пробелы и преобразуем в верхний регистр
             self.model = text.upper().replace(" ", "")
-            # Получаем данные из базы данных
             self.get_info()
         else:
             print("Не введено название станка")
@@ -136,7 +134,6 @@ class DatabaseEditorWindow(Screen):
         if len(value) > 0:
             filtered = filter_names(value)
             dropdown.update_items(filtered)
-            # Показываем список только если есть варианты и поле в фокусе
             if filtered and searchbar.input.focus:
                 dropdown.opacity = 1
                 # Позиционируем dropdown под searchbar
@@ -176,12 +173,9 @@ class DatabaseEditorWindow(Screen):
     def set_widget_data(self, data: MachineInfo):
         """Устанавливает данные в виджеты."""
         if isinstance(data, MachineInfo):
-            #  получаем список типов станков для выпадающего списка по группе выбранного станка
             str_group = str(int(data.group))
             type_fields = get_type_fields_descriptions(str_group)
-            #  устанавливаем список типов станков для выпадающего списка типа станка
             self.content_widget.left_col.type_spinner.spinner.values = type_fields
-            #  устанавливаем значения для полей по данным из базы данных
             self.content_widget.left_col.group_spinner.set_value(str_group)
             self.content_widget.left_col.type_spinner.set_value(str(int(data.type)))
             self.content_widget.left_col.machine_type_input.set_value(str(data.machine_type))

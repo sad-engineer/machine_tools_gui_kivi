@@ -34,7 +34,6 @@ class SearchBar(BoxLayout):
         self.debug_mode = debug_mode
         self.height = height
 
-        # Горизонтальный контейнер для поля и кнопки
         search_box = BoxLayout(orientation="horizontal", size_hint=(1, None), height=height, spacing=2)
 
         self.input = TextInput(
@@ -44,14 +43,13 @@ class SearchBar(BoxLayout):
             size_hint=(input_ratio, 1),
         )
 
-        # Кнопка
         self.button = Button(
             text=button_text,
             size_hint=(1 - input_ratio, 1),
             text_size=(None, None),
             halign="center",
             valign="middle",
-            font_size="12sp",  # Уменьшаем размер шрифта
+            font_size="12sp",
         )
         self.button.bind(size=lambda *x: setattr(self.button, "text_size", (self.button.width, self.button.height)))
 
@@ -91,7 +89,6 @@ if __name__ == "__main__":
             self.searchbar.pos_hint = {"top": 1}
             root.add_widget(self.searchbar)
 
-            # --- Добавляем выпадающий список ---
             self.dropdown = DropdownList(
                 size_hint=(0.7, None),
                 height=150,
@@ -103,7 +100,6 @@ if __name__ == "__main__":
             )
             root.add_widget(self.dropdown)
 
-            # Привязываем обработчики
             self.searchbar.input.bind(focus=self.on_focus)
             self.searchbar.input.bind(text=self.on_print_text)
             self.searchbar.button.bind(on_release=self.on_search)
@@ -112,7 +108,6 @@ if __name__ == "__main__":
             return root
 
         def on_print_text(self, instance, value):
-            # Фильтрация вариантов
             options = [
                 "Apple",
                 "Banana",
@@ -125,10 +120,8 @@ if __name__ == "__main__":
             ]
             filtered = [opt for opt in options if value.lower() in opt.lower()] if value else []
             self.dropdown.update_items(filtered)
-            # Показываем список только если есть варианты и поле в фокусе
             if filtered and self.searchbar.input.focus:
                 self.dropdown.opacity = 1
-                # Позиционируем dropdown под searchbar
                 self.dropdown.width = self.searchbar.input.width
                 self.dropdown.x = self.searchbar.input.to_window(self.searchbar.input.x, self.searchbar.input.y)[0]
                 self.dropdown.y = (

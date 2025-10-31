@@ -32,7 +32,6 @@ class LabeledSpinner(BoxLayout):
     ):
         super().__init__(orientation="vertical", size_hint=(1, None), height=height, spacing=spacing, **kwargs)
         self.debug_mode = debug_mode
-        # Лейбл
         label = Label(
             text=label_text,
             size_hint=(1, None),
@@ -42,7 +41,6 @@ class LabeledSpinner(BoxLayout):
         )
         label.bind(size=lambda *x: setattr(label, "text_size", (label.width, label.height)))
         self.label = label
-        # Выпадающий список
         spinner = Spinner(
             text=spinner_text if spinner_text else (values[0] if values else ""),
             values=values,
@@ -67,7 +65,6 @@ class LabeledSpinner(BoxLayout):
         self.add_widget(self.label)
         self.add_widget(self.spinner)
 
-        # DEBUG background
         self.bind(pos=self._update_debug_bg, size=self._update_debug_bg)
         self._update_debug_bg()
 
